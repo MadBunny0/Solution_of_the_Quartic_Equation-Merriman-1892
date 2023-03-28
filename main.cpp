@@ -18,26 +18,30 @@ using namespace std;
 
 // Функция проверки элемента на ноль (x == 0)
 template<typename fp_t>
-inline bool isZero(static const fp_t &x) {
+inline bool isZero(static const fp_t& x)
+{
     return FP_ZERO == fpclassify(x);
 }
 
 // Функция проверки равенства двух переменных (A == B)
 template<typename fp_t>
-inline bool isEqual(const fp_t &A, const fp_t &B) {
+inline bool isEqual(const fp_t& A, const fp_t& B)
+{
     return abs(A - B) < numeric_limits<fp_t>::epsilon() * (abs(B) + abs(A)) * static_cast<fp_t>(0.5L);
 }
 
 // Функция вычисления разности произведений с оптимизацией погрешности (a * b - c * d)
 template<typename fp_t>
-inline fp_t fms(fp_t a, fp_t b, fp_t c, fp_t d) {
+inline fp_t fms(fp_t a, fp_t b, fp_t c, fp_t d)
+{
     fp_t cd = -c * d;
 
     return fma(a, b, cd) - fma(c, d, cd);
 }
 
 template<typename fp_t>
-complex <fp_t> fmac(complex <fp_t> x, complex <fp_t> y, complex <fp_t> z) {
+complex<fp_t> fmac(complex<fp_t> x, complex<fp_t> y, complex<fp_t> z)
+{
     fp_t r = fma(-x.imag(), y.imag(), fma(x.real(), y.real(), z.real()));
     fp_t i = fma(y.real(), x.imag(), fma(x.real(), y.imag(), z.imag()));
 
@@ -45,31 +49,36 @@ complex <fp_t> fmac(complex <fp_t> x, complex <fp_t> y, complex <fp_t> z) {
 }
 
 template<typename fp_t>
-complex <fp_t> fmsc(complex <fp_t> a, complex <fp_t> b, complex <fp_t> c, complex <fp_t> d) {
-    complex <fp_t> cd = -c * d;
+complex<fp_t> fmsc(complex<fp_t> a, complex<fp_t> b, complex<fp_t> c, complex<fp_t> d)
+{
+    complex<fp_t> cd = -c * d;
 
     return fmac(a, b, cd) - fmac(c, d, cd);
 }
 
 // Сигнатурная функция
-template<typename fp_t>
-inline int sgn(static const fp_t &x) {
+template <typename fp_t>
+inline int sgn(static const fp_t& x)
+{
     return (fp_t(0) < x) - (x < fp_t(0));
 }
 
 // Функция определяющая является ли число вещественным, путем определения того, насколько мала мнимая часть
 template<typename fp_t>
-inline complex <fp_t> epsilonComplex(complex <fp_t> x) {
+inline complex<fp_t> epsilonComplex(complex<fp_t> x)
+{
     return abs(x) * numeric_limits<fp_t>::epsilon() > abs(x.imag()) ? complex<fp_t>(x.real(), 0) : x;
 }
 
 template<typename fp_t>
-inline bool isComplex(static const complex <fp_t> &x) {
+inline bool isComplex(static const complex<fp_t>& x)
+{
     return abs(x) * numeric_limits<fp_t>::epsilon() <= abs(x.imag());
 }
 
 template<typename fp_t>
-fp_t dscrmt(fp_t A, fp_t B, fp_t C) {
+fp_t dscrmt(fp_t A, fp_t B, fp_t C)
+{
     fp_t p = B * B;
     fp_t q = A * C;
     //Use the hardware's FMA
@@ -80,13 +89,14 @@ fp_t dscrmt(fp_t A, fp_t B, fp_t C) {
 }
 
 template<typename fp_t>
-complex <fp_t> dscrmt(complex <fp_t> A, complex <fp_t> B, complex <fp_t> C) {
-    complex <fp_t> p = B * B;
-    complex <fp_t> q = A * C;
+complex<fp_t> dscrmt(complex<fp_t> A, complex<fp_t> B, complex<fp_t> C)
+{
+    complex<fp_t> p = B * B;
+    complex<fp_t> q = A * C;
     //Use the hardware's FMA
-    complex <fp_t> dp = fmac(B, B, -p);
-    complex <fp_t> dq = fmac(A, C, -q);
-    complex <fp_t> d = (p - q) + (dp - dq);
+    complex<fp_t> dp = fmac(B, B, -p);
+    complex<fp_t> dq = fmac(A, C, -q);
+    complex<fp_t> d = (p - q) + (dp - dq);
     return d;
 }
 
@@ -96,7 +106,8 @@ complex <fp_t> dscrmt(complex <fp_t> A, complex <fp_t> B, complex <fp_t> C) {
     Имплементация метода решения линейного уравнения
 */
 template<typename fp_t>
-unsigned int solveLinear(fp_t a, fp_t b, vector <fp_t> &roots) {
+unsigned int solveLinear(fp_t a, fp_t b, vector<fp_t>& roots)
+{
     roots[0] = -b / a;
 
     return isnan(roots[0]) || isinf(roots[0]) ? 0 : 1;
@@ -106,7 +117,8 @@ unsigned int solveLinear(fp_t a, fp_t b, vector <fp_t> &roots) {
     Имплементация метода решения квадратного уравнения
 */
 template<typename fp_t>
-unsigned int solveQuadratic(fp_t n, fp_t a, fp_t b, vector <fp_t> &roots) {
+unsigned int solveQuadratic(fp_t n, fp_t a, fp_t b, vector<fp_t>& roots)
+{
     if (isZero(n) || isinf(a /= n))
         return 0;
     if (isinf(b /= n))
@@ -132,7 +144,8 @@ unsigned int solveQuadratic(fp_t n, fp_t a, fp_t b, vector <fp_t> &roots) {
 }
 
 template<typename fp_t>
-unsigned int solveQuadratic(fp_t n, fp_t a, fp_t b, vector <complex<fp_t>> &roots) {
+unsigned int solveQuadratic(fp_t n, fp_t a, fp_t b, vector<complex<fp_t>>& roots)
+{
     if (isZero(n) || isinf(a /= n))
         return 0;
     if (isinf(b /= n))
@@ -141,34 +154,35 @@ unsigned int solveQuadratic(fp_t n, fp_t a, fp_t b, vector <complex<fp_t>> &root
     a /= static_cast<fp_t>(-2.0L);
 
     fp_t d = dscrmt(n, a, b);
-    complex <fp_t> sqrtD = sqrt(complex<fp_t>(d, static_cast<fp_t>(0.0L)));
+    complex<fp_t> sqrtD = sqrt(complex<fp_t>(d, static_cast<fp_t>(0.0L)));
 
-    complex <fp_t> S(a, static_cast<fp_t>(0.0L));
-    complex <fp_t> partS(sgn(a) + (isZero(a), static_cast<fp_t>(0.0L)));
+    complex<fp_t> S(a, static_cast<fp_t>(0.0L));
+    complex<fp_t> partS(sgn(a) + (isZero(a), static_cast<fp_t>(0.0L)));
 
     S = fmac(sqrtD, partS, S);
 
-    complex <fp_t> Z1 = S;
-    complex <fp_t> Z2 = (b) / S;
+    complex<fp_t> Z1 = S;
+    complex<fp_t> Z2 = (b) / S;
 
     roots[0] = Z1;
     roots[1] = Z2;
 }
 
 template<typename fp_t>
-unsigned int solveQuadratic(complex <fp_t> n, complex <fp_t> a, complex <fp_t> b, vector <complex<fp_t>> &roots) {
+unsigned int solveQuadratic(complex<fp_t> n, complex<fp_t> a, complex<fp_t> b, vector<complex<fp_t>>& roots)
+{
     a /= static_cast<fp_t>(-2.0L);
 
-    complex <fp_t> d = dscrmt(n, a, b);
-    complex <fp_t> sqrtD = sqrt(complex<fp_t>(d));
+    complex<fp_t> d = dscrmt(n, a, b);
+    complex<fp_t> sqrtD = sqrt(complex<fp_t>(d));
 
-    complex <fp_t> S(a);
-    complex <fp_t> partS(sgn(a) + (isZero(a.real()) && isZero(a.imag()), static_cast<fp_t>(0.0L)));
+    complex<fp_t> S(a);
+    complex<fp_t> partS(sgn(a) + (isZero(a.real()) && isZero(a.imag()), static_cast<fp_t>(0.0L)));
 
     S = fmac(sqrtD, partS, S);
 
-    complex <fp_t> Z1 = S;
-    complex <fp_t> Z2 = (b) / S;
+    complex<fp_t> Z1 = S;
+    complex<fp_t> Z2 = (b) / S;
 
     roots[0] = Z1;
     roots[1] = Z2;
@@ -182,7 +196,8 @@ unsigned int solveQuadratic(complex <fp_t> n, complex <fp_t> a, complex <fp_t> b
     Работу выполнил — Погосов Даниэль (https://github.com/DarklleS)
 */
 template<typename fp_t>
-unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector <fp_t> &roots) {
+unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<fp_t>& roots)
+{
     // Нормировка коэффициентов
     if (isZero(n) || isinf(a /= n))
         return solveQuadratic(a, b, c, roots);
@@ -198,13 +213,11 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector <fp_t> &roots) {
     static const fp_t ONE_NINTH = static_cast<fp_t>(1.0L / 9.0L);
     static const fp_t ONE_54TH = static_cast<fp_t>(1.0L / 54.0L);
     static const fp_t A_THIRD = -a * ONE_THIRD;
-    static constexpr fp_t
-    EPS = numeric_limits<fp_t>::epsilon();
+    static constexpr fp_t EPS = numeric_limits<fp_t>::epsilon();
 
     // Основные расчетные коэффициенты
-    fp_t Q = fms(static_cast<fp_t>(3.0L), b, a, a) * ONE_NINTH;
-    fp_t R = fms(fms(static_cast<fp_t>(9.0L), b, static_cast<fp_t>(2.0L) * a, a), a, static_cast<fp_t>(27.0L), c) *
-             ONE_54TH;
+    fp_t Q = fms(static_cast<fp_t>(3.0L), b, a, a)* ONE_NINTH;
+    fp_t R = fms(fms(static_cast<fp_t>(9.0L), b, static_cast<fp_t>(2.0L)* a, a), a, static_cast<fp_t>(27.0L), c)* ONE_54TH;
 
     // Дискриминант
     fp_t D = fms(R, R, -Q, Q * Q);
@@ -214,35 +227,37 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector <fp_t> &roots) {
         if (isZero(Q)) // Все все корни вещественные и кратны трем
         {
             roots =
-                    {
-                            A_THIRD,
-                            A_THIRD,
-                            A_THIRD
-                    };
-        } else // Все все корни вещественные, один из которых кратен двум
+            {
+                A_THIRD,
+                A_THIRD,
+                A_THIRD
+            };
+        }
+        else // Все все корни вещественные, один из которых кратен двум
         {
             // Дополнительные расчетные коэффициенты
             fp_t theta = acos(R / pow(-Q, static_cast<fp_t>(1.5L)));
             fp_t phi = theta * ONE_THIRD;
-            fp_t sqrtQ = static_cast<fp_t>(2.0L) * sqrt(-Q);
+            fp_t sqrtQ = static_cast<fp_t>(2.0L)* sqrt(-Q);
 
             roots =
-                    {
-                            fms(sqrtQ, cos(phi), a, ONE_THIRD),
-                            fms(sqrtQ, cos(fma(static_cast<fp_t>(-2.0L) * PI, ONE_THIRD, phi)), a, ONE_THIRD),
-                            fms(sqrtQ, cos(fma(static_cast<fp_t>(2.0L) * PI, ONE_THIRD, phi)), a, ONE_THIRD)
-                    };
+            {
+                fms(sqrtQ, cos(phi), a, ONE_THIRD),
+                fms(sqrtQ, cos(fma(static_cast<fp_t>(-2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD),
+                fms(sqrtQ, cos(fma(static_cast<fp_t>(2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD)
+            };
 
             sort(roots.begin(), roots.end());
         }
 
         return 3;
-    } else // Обрабатываем два комплексных корня, определяя их вещественность
+    }
+    else // Обрабатываем два комплексных корня, определяя их вещественность
     {
         // Дополнительные расчетные коэффициенты
         fp_t A = cbrt(abs(R) + sqrt(D));
         fp_t T = R >= -EPS ? A - Q / A :
-                 Q / A - A;
+            Q / A - A;
 
         fp_t sqrt3Half = static_cast<fp_t>(sqrt(3.0L) * 0.5L);
 
@@ -254,21 +269,22 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector <fp_t> &roots) {
             fp_t multipleRoot = fms(-ONE_THIRD, a, ONE_HALF, T);
 
             roots =
-                    {
-                            fma(-ONE_THIRD, a, T),
-                            multipleRoot,
-                            multipleRoot
-                    };
+            {
+                fma(-ONE_THIRD, a, T),
+                multipleRoot,
+                multipleRoot
+            };
 
             sort(roots.begin(), roots.end());
 
             return 3;
-        } else // Только один корень вещественный, остальные комплексные
+        }
+        else // Только один корень вещественный, остальные комплексные
         {
             roots =
-                    {
-                            fma(-ONE_THIRD, a, T)
-                    };
+            {
+                 fma(-ONE_THIRD, a, T)
+            };
 
             return 1;
         }
@@ -281,7 +297,8 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector <fp_t> &roots) {
     Работу выполнил — Погосов Даниэль (https://github.com/DarklleS)
 */
 template<typename fp_t>
-unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector <complex<fp_t>> &roots) {
+unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<complex<fp_t>>& roots)
+{
     // Нормировка коэффициентов
     if (isZero(n) || isinf(a /= n))
         return 0;
@@ -297,13 +314,11 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector <complex<fp_t>> &
     static const fp_t ONE_NINTH = static_cast<fp_t>(1.0L / 9.0L);
     static const fp_t ONE_54TH = static_cast<fp_t>(1.0L / 54.0L);
     static const fp_t A_THIRD = -a * ONE_THIRD;
-    static constexpr fp_t
-    EPS = numeric_limits<fp_t>::epsilon();
+    static constexpr fp_t EPS = numeric_limits<fp_t>::epsilon();
 
     // Основные расчетные коэффициенты
-    fp_t Q = fms(static_cast<fp_t>(3.0L), b, a, a) * ONE_NINTH;
-    fp_t R = fms(fms(static_cast<fp_t>(9.0L), b, static_cast<fp_t>(2.0L) * a, a), a, static_cast<fp_t>(27.0L), c) *
-             ONE_54TH;
+    fp_t Q = fms(static_cast<fp_t>(3.0L), b, a, a)* ONE_NINTH;
+    fp_t R = fms(fms(static_cast<fp_t>(9.0L), b, static_cast<fp_t>(2.0L)* a, a), a, static_cast<fp_t>(27.0L), c)* ONE_54TH;
 
     // Дискриминант
     fp_t D = fms(R, R, -Q, Q * Q);
@@ -312,45 +327,44 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector <complex<fp_t>> &
     {
         if (isZero(Q)) // Все все корни вещественные и кратны трем
         {
-            complex <fp_t> root(A_THIRD, static_cast<fp_t>(0.0L));
+            complex<fp_t> root(A_THIRD, static_cast<fp_t>(0.0L));
 
             roots =
-                    {
-                            root,
-                            root,
-                            root
-                    };
-        } else // Все все корни вещественные, один из которых кратен двум
+            {
+                root,
+                root,
+                root
+            };
+        }
+        else // Все все корни вещественные, один из которых кратен двум
         {
             // Дополнительные расчетные коэффициенты
             fp_t theta = acos(R / pow(-Q, static_cast<fp_t>(1.5L)));
             fp_t phi = theta * ONE_THIRD;
-            fp_t sqrtQ = static_cast<fp_t>(2.0L) * sqrt(-Q);
+            fp_t sqrtQ = static_cast<fp_t>(2.0L)* sqrt(-Q);
 
             roots =
-                    {
-                            complex<fp_t>(fms(sqrtQ, cos(phi), a, ONE_THIRD), static_cast<fp_t>(0.0L)),
-                            complex<fp_t>(
-                                    fms(sqrtQ, cos(fma(static_cast<fp_t>(-2.0L) * PI, ONE_THIRD, phi)), a, ONE_THIRD),
-                                    static_cast<fp_t>(0.0L)),
-                            complex<fp_t>(
-                                    fms(sqrtQ, cos(fma(static_cast<fp_t>(2.0L) * PI, ONE_THIRD, phi)), a, ONE_THIRD),
-                                    static_cast<fp_t>(0.0L))
-                    };
+            {
+                complex<fp_t>(fms(sqrtQ, cos(phi), a, ONE_THIRD), static_cast<fp_t>(0.0L)),
+                complex<fp_t>(fms(sqrtQ, cos(fma(static_cast<fp_t>(-2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD), static_cast<fp_t>(0.0L)),
+                complex<fp_t>(fms(sqrtQ, cos(fma(static_cast<fp_t>(2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD), static_cast<fp_t>(0.0L))
+            };
 
             sort(roots.begin(), roots.end(),
-                 [](complex <fp_t> &a, complex <fp_t> &b) {
-                     return a.real() < b.real();
-                 });
+                [](complex<fp_t>& a, complex<fp_t>& b)
+                {
+                    return a.real() < b.real();
+                });
         }
 
         return 3;
-    } else // Обрабатываем два комплексных корня, определяя их вещественность
+    }
+    else // Обрабатываем два комплексных корня, определяя их вещественность
     {
         // Дополнительные расчетные коэффициенты
         fp_t A = cbrt(abs(R) + sqrt(D));
         fp_t T = R >= -EPS ? A - Q / A :
-                 Q / A - A;
+            Q / A - A;
 
         fp_t sqrt3Half = static_cast<fp_t>(sqrt(3.0L) * 0.5L);
 
@@ -359,31 +373,33 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector <complex<fp_t>> &
 
         if (abs(imagPart) <= EPS) // Все корни вещественные, один из которых кратен двум
         {
-            complex <fp_t> multipleRoot(fms(-ONE_THIRD, a, ONE_HALF, T), static_cast<fp_t>(0.0L));
+            complex<fp_t> multipleRoot(fms(-ONE_THIRD, a, ONE_HALF, T), static_cast<fp_t>(0.0L));
 
             roots =
-                    {
-                            complex<fp_t>(fma(-ONE_THIRD, a, T), static_cast<fp_t>(0.0L)),
-                            multipleRoot,
-                            multipleRoot
-                    };
+            {
+                complex<fp_t>(fma(-ONE_THIRD, a, T), static_cast<fp_t>(0.0L)),
+                multipleRoot,
+                multipleRoot
+            };
 
             sort(roots.begin(), roots.end(),
-                 [](complex <fp_t> &a, complex <fp_t> &b) {
-                     return a.real() < b.real();
-                 });
+                [](complex<fp_t>& a, complex<fp_t>& b)
+                {
+                    return a.real() < b.real();
+                });
 
             return 3;
-        } else // Только один корень вещественный, остальные комплексные
+        }
+        else // Только один корень вещественный, остальные комплексные
         {
             fp_t rootRealPart = fms(-ONE_THIRD, a, ONE_HALF, T);
 
             roots =
-                    {
-                            complex<fp_t>(fma(-ONE_THIRD, a, T), static_cast<fp_t>(0.0L)),
-                            complex<fp_t>(rootRealPart, imagPart),
-                            complex<fp_t>(rootRealPart, -imagPart)
-                    };
+            {
+                complex<fp_t>(fma(-ONE_THIRD, a, T), static_cast<fp_t>(0.0L)),
+                complex<fp_t>(rootRealPart, imagPart),
+                complex<fp_t>(rootRealPart, -imagPart)
+            };
 
             return 1;
         }
@@ -396,7 +412,8 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector <complex<fp_t>> &
     Работу выполнил — Погосов Даниэль (https://github.com/DarklleS)
 */
 template<typename fp_t>
-unsigned int ferrari(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots) {
+unsigned int ferrari(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>& roots)
+{
     // Нормировка коэффициентов
     if (isZero(n) || isinf(a /= n))
         return solveCubic(a, b, c, d, roots);
@@ -410,22 +427,20 @@ unsigned int ferrari(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &root
     // Объявление констант
     static const fp_t ONE_HALF = static_cast<fp_t>(0.5L);
     static const fp_t ONE_QUARTER = static_cast<fp_t>(0.25L);
-    static constexpr fp_t
-    EPS = numeric_limits<fp_t>::epsilon();
+    static constexpr fp_t EPS = numeric_limits<fp_t>::epsilon();
 
     // Количество вещественных корней
     unsigned numberOfRoots = 0;
 
     // Вычисляем расчетные коэффициенты
     fp_t C = a * ONE_QUARTER;
-    fp_t a_ = fma(static_cast<fp_t>(-6.0L) * C, C, b);
-    fp_t b_ = fma(fms(static_cast<fp_t>(8.0L) * C, C, static_cast<fp_t>(2.0L), b), C, c);
-    fp_t c_ = fma(fma(fma(static_cast<fp_t>(-3.0L) * C, C, b), C, -c), C, d);
+    fp_t a_ = fma(static_cast<fp_t>(-6.0L)* C, C, b);
+    fp_t b_ = fma(fms(static_cast<fp_t>(8.0L)* C, C, static_cast<fp_t>(2.0L), b), C, c);
+    fp_t c_ = fma(fma(fma(static_cast<fp_t>(-3.0L)* C, C, b), C, -c), C, d);
 
     // Решаем резольвентное кубическое уравнение вида: m^3 + a_ * m^2 + (a_^2 / 4 - c_) * m - b_^2 / 8 = 0
-    vector <fp_t> cubicRoots(3);
-    unsigned numberOfCubicRoots = solveCubic(static_cast<fp_t>(1.0L), a_, fma(ONE_QUARTER * a_, a_, -c_),
-                                             -b_ * b_ * static_cast<fp_t>(0.125L), cubicRoots);
+    vector<fp_t> cubicRoots(3);
+    unsigned numberOfCubicRoots = solveCubic(static_cast<fp_t>(1.0L), a_, fma(ONE_QUARTER * a_, a_, -c_), -b_ * b_ * static_cast<fp_t>(0.125L), cubicRoots);
 
     // Выбираем корень, который удовлетворяет условию: m > 0 и является вещественным корнем, иначе m = 0
     fp_t m = cubicRoots[numberOfCubicRoots - 1] > 0 ? cubicRoots[numberOfCubicRoots - 1] : static_cast<fp_t>(0.0L);
@@ -452,22 +467,25 @@ unsigned int ferrari(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &root
     fp_t rootPart = sqrtM - C;
 
     // Если полученный радиканд (radicand) > 0 либо близок к 0, то уравнение имеет два либо больше вещественных решений
-    if (radicand >= 0) {
+    if (radicand >= 0)
+    {
         fp_t radical = sqrt(radicand);
 
         roots =
-                {
-                        rootPart + radical,
-                        rootPart - radical
-                };
+        {
+            rootPart + radical,
+            rootPart - radical
+        };
 
         numberOfRoots += 2;
-    } else if (abs(radicand) <= EPS) {
+    }
+    else if (abs(radicand) <= EPS)
+    {
         roots =
-                {
-                        rootPart,
-                        rootPart
-                };
+        {
+            rootPart,
+            rootPart
+        };
 
         numberOfRoots += 2;
     }
@@ -475,14 +493,17 @@ unsigned int ferrari(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &root
     rootPart = -sqrtM - C;
 
     // Если полученный радиканд (radicand_) > 0 либо близок к 0, то уравнение имеет два либо больше вещественных решений
-    if (radicand_ >= 0) {
+    if (radicand_ >= 0)
+    {
         fp_t radical = sqrt(radicand_);
 
         roots[numberOfRoots] = rootPart + radical;
         roots[numberOfRoots + 1] = rootPart - radical;
 
         numberOfRoots += 2;
-    } else if (abs(radicand_) <= EPS) {
+    }
+    else if (abs(radicand_) <= EPS)
+    {
         roots[numberOfRoots] = rootPart;
         roots[numberOfRoots + 1] = rootPart;
 
@@ -498,7 +519,8 @@ unsigned int ferrari(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &root
     Работу выполнил — Погосов Даниэль (https://github.com/DarklleS)
 */
 template<typename fp_t>
-unsigned int descartes(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots) {
+unsigned int descartes(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>& roots)
+{
     // Нормировка коэффициентов
     if (isZero(n) || isinf(a /= n))
         return solveCubic(a, b, c, d, roots);
@@ -512,22 +534,20 @@ unsigned int descartes(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &ro
     // Объявление констант
     static const fp_t ONE_HALF = static_cast<fp_t>(0.5L);
     static const fp_t ONE_QUARTER = static_cast<fp_t>(0.25L);
-    static constexpr fp_t
-    EPS = numeric_limits<fp_t>::epsilon();
+    static constexpr fp_t EPS = numeric_limits<fp_t>::epsilon();
 
     // Количество вещественных корней
     unsigned numberOfRoots = 0;
 
     // Вычисляем расчетные коэффициенты
     fp_t C = a * ONE_QUARTER;
-    fp_t a_ = fma(static_cast<fp_t>(-6.0L) * C, C, b);
-    fp_t b_ = fma(fms(static_cast<fp_t>(8.0L) * C, C, static_cast<fp_t>(2.0L), b), C, c);
-    fp_t c_ = fma(fma(fma(static_cast<fp_t>(-3.0L) * C, C, b), C, -c), C, d);
+    fp_t a_ = fma(static_cast<fp_t>(-6.0L)* C, C, b);
+    fp_t b_ = fma(fms(static_cast<fp_t>(8.0L)* C, C, static_cast<fp_t>(2.0L), b), C, c);
+    fp_t c_ = fma(fma(fma(static_cast<fp_t>(-3.0L)* C, C, b), C, -c), C, d);
 
     // Решаем резольвентное бикубическое уравнение вида: y^6 + 2 * a_ * y^4 + (a_^2 - 4 * c_) * y^2 - b_^2 = 0
-    vector <fp_t> cubicRoots(3);
-    unsigned numberOfCubicRoots = solveCubic(static_cast<fp_t>(1.0L), static_cast<fp_t>(2.0L) * a_,
-                                             fms(a_, a_, static_cast<fp_t>(4.0L), c_), -b_ * b_, cubicRoots);
+    vector<fp_t> cubicRoots(3);
+    unsigned numberOfCubicRoots = solveCubic(static_cast<fp_t>(1.0L), static_cast<fp_t>(2.0L)* a_, fms(a_, a_, static_cast<fp_t>(4.0L), c_), -b_ * b_, cubicRoots);
 
     // Выбираем корень, который удовлетворяет условию: y^2 > 0 и является вещественным корнем, иначе y^2 = 0
     fp_t yy = cubicRoots[numberOfCubicRoots - 1] > 0 ? cubicRoots[numberOfCubicRoots - 1] : static_cast<fp_t>(0.0L);
@@ -555,22 +575,25 @@ unsigned int descartes(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &ro
     fp_t rootPart = fma(ONE_HALF, y, -C);
 
     // Если полученный радиканд (radicand) > 0 либо близок к 0, то уравнение имеет два либо больше вещественных решений
-    if (radicand >= 0) {
+    if (radicand >= 0)
+    {
         fp_t radical = sqrt(radicand);
 
         roots =
-                {
-                        rootPart + radical,
-                        rootPart - radical
-                };
+        {
+            rootPart + radical,
+            rootPart - radical
+        };
 
         numberOfRoots += 2;
-    } else if (abs(radicand) <= EPS) {
+    }
+    else if (abs(radicand) <= EPS)
+    {
         roots =
-                {
-                        rootPart,
-                        rootPart
-                };
+        {
+            rootPart,
+            rootPart
+        };
 
         numberOfRoots += 2;
     }
@@ -578,14 +601,17 @@ unsigned int descartes(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &ro
     rootPart = fma(-ONE_HALF, y, -C);
 
     // Если полученный радиканд (radicand) > 0 либо близок к 0, то уравнение имеет два либо больше вещественных решений
-    if (radicand_ >= 0) {
+    if (radicand_ >= 0)
+    {
         fp_t radical = sqrt(radicand_);
 
         roots[numberOfRoots] = rootPart + radical;
         roots[numberOfRoots + 1] = rootPart - radical;
 
         numberOfRoots += 2;
-    } else if (abs(radicand_) <= EPS) {
+    }
+    else if (abs(radicand_) <= EPS)
+    {
         roots[numberOfRoots] = rootPart;
         roots[numberOfRoots + 1] = rootPart;
 
@@ -601,7 +627,8 @@ unsigned int descartes(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &ro
     Работу выполнил — Погосов Даниэль (https://github.com/DarklleS)
 */
 template<typename fp_t>
-unsigned int nbs(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots) {
+unsigned int nbs(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>& roots)
+{
     // Нормировка коэффициентов
     if (isZero(n) || isinf(a /= n))
         return solveCubic(a, b, c, d, roots);
@@ -615,8 +642,7 @@ unsigned int nbs(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots) {
     // Объявление констант
     static const fp_t ONE_HALF = static_cast<fp_t>(0.5L);
     static const fp_t ONE_QUARTER = static_cast<fp_t>(0.25L);
-    static constexpr fp_t
-    EPS = numeric_limits<fp_t>::epsilon();
+    static constexpr fp_t EPS = numeric_limits<fp_t>::epsilon();
 
     // Количество вещественных корней
     unsigned numberOfRoots = 0;
@@ -627,7 +653,7 @@ unsigned int nbs(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots) {
     fp_t c_ = fms(fms(static_cast<fp_t>(4.0L), b, a, a), d, c, c);
 
     // Решаем резольвентное кубическое уравнение вида: u^3 + a_ * u^2 + b_ * u + c_ = 0
-    vector <fp_t> cubicRoots(3);
+    vector<fp_t> cubicRoots(3);
     unsigned numberOfCubicRoots = solveCubic(static_cast<fp_t>(1.0L), a_, b_, c_, cubicRoots);
 
     // Выбираем наибольший вещественный корень
@@ -658,37 +684,43 @@ unsigned int nbs(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots) {
     fp_t radicand_ = fma(ONE_QUARTER * p2, p2, -q2);
 
     // Если полученный радиканд (radicand) > 0 либо близок к 0, то уравнение имеет два либо больше вещественных решений
-    if (radicand >= 0) {
+    if (radicand >= 0)
+    {
         fp_t radical = sqrt(radicand);
 
         roots =
-                {
-                        fma(-ONE_HALF, p1, radical),
-                        fma(-ONE_HALF, p1, -radical)
-                };
+        {
+            fma(-ONE_HALF, p1, radical),
+            fma(-ONE_HALF, p1, -radical)
+        };
 
         numberOfRoots += 2;
-    } else if (abs(radicand) <= EPS) {
+    }
+    else if (abs(radicand) <= EPS)
+    {
         fp_t root = -p1 * ONE_HALF;
 
         roots =
-                {
-                        root,
-                        root
-                };
+        {
+            root,
+            root
+        };
 
         numberOfRoots += 2;
     }
 
     // Если полученный радиканд (radicand_) > 0 либо близок к 0, то уравнение имеет два либо больше вещественных решений
-    if (radicand_ >= 0) {
+    if (radicand_ >= 0)
+    {
         fp_t radical = sqrt(radicand_);
 
         roots[numberOfRoots] = fma(-ONE_HALF, p2, radical);
         roots[numberOfRoots + 1] = fma(-ONE_HALF, p2, -radical);;
 
         numberOfRoots += 2;
-    } else if (abs(radicand_) <= EPS) {
+    }
+    else if (abs(radicand_) <= EPS)
+    {
         fp_t root = -p2 * ONE_HALF;
 
         roots[numberOfRoots] = root;
@@ -706,7 +738,8 @@ unsigned int nbs(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots) {
     Работу выполнил — Погосов Даниэль (https://github.com/DarklleS)
 */
 template<typename fp_t>
-unsigned int euler(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots) {
+unsigned int euler(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>& roots)
+{
     // Нормировка коэффициентов
     if (isZero(n) || isinf(a /= n))
         return solveCubic(a, b, c, d, roots);
@@ -720,23 +753,20 @@ unsigned int euler(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots)
     // Объявление констант
     static const fp_t ONE_HALF = static_cast<fp_t>(0.5L);
     static const fp_t ONE_QUARTER = static_cast<fp_t>(0.25L);
-    static constexpr fp_t
-    EPS = numeric_limits<fp_t>::epsilon();
+    static constexpr fp_t EPS = numeric_limits<fp_t>::epsilon();
 
     // Количество вещественных корней
     unsigned numberOfRoots = 0;
 
     // Вычисляем расчетные коэффициенты
     fp_t C = a * ONE_QUARTER;
-    fp_t a_ = fma(static_cast<fp_t>(-6.0L) * C, C, b);
-    fp_t b_ = fma(fms(static_cast<fp_t>(8.0L) * C, C, static_cast<fp_t>(2.0L), b), C, c);
-    fp_t c_ = fma(fma(fma(static_cast<fp_t>(-3.0L) * C, C, b), C, -c), C, d);
+    fp_t a_ = fma(static_cast<fp_t>(-6.0L)* C, C, b);
+    fp_t b_ = fma(fms(static_cast<fp_t>(8.0L)* C, C, static_cast<fp_t>(2.0L), b), C, c);
+    fp_t c_ = fma(fma(fma(static_cast<fp_t>(-3.0L)* C, C, b), C, -c), C, d);
 
     // Решаем резольвентное кубическое уравнение вида: r^3 + a_ / 2 * r^2 + (a_^2 - 4 * c_) / 16 * r - b_^2 / 64 = 0
-    vector <complex<fp_t>> cubicRoots(3);
-    unsigned numberOfCubicRoots = solveCubic(static_cast<fp_t>(1.0L), a_ * ONE_HALF,
-                                             fms(static_cast<fp_t>(0.0625L) * a_, a_, ONE_QUARTER, c_),
-                                             -b_ * b_ * static_cast<fp_t>(0.015625L), cubicRoots);
+    vector<complex<fp_t>> cubicRoots(3);
+    unsigned numberOfCubicRoots = solveCubic(static_cast<fp_t>(1.0L), a_* ONE_HALF, fms(static_cast<fp_t>(0.0625L)* a_, a_, ONE_QUARTER, c_), -b_ * b_ * static_cast<fp_t>(0.015625L), cubicRoots);
 
     // Определяем знак радикандов
     fp_t sigma = b_ > 0 ? static_cast<fp_t>(1.0L) : static_cast<fp_t>(-1.0L);
@@ -749,7 +779,8 @@ unsigned int euler(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots)
 
     // Вычисление радикандов. Разбераем 2 случая дабы оптимизировать вычисления
     // - Если решение резольвентного кубического уравнения имеет единственный вещественный корень
-    if (numberOfCubicRoots == 1) {
+    if (numberOfCubicRoots == 1)
+    {
         r = cubicRoots[0].real();
         if (r < 0)
             return 0;
@@ -765,11 +796,12 @@ unsigned int euler(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots)
 
         fp_t subRadical = sqrt(subradicand);
 
-        radicand = fms(static_cast<fp_t>(2.0L), x2, static_cast<fp_t>(2.0L) * sigma, subRadical);
-        radicand_ = fms(static_cast<fp_t>(2.0L), x2, static_cast<fp_t>(-2.0L) * sigma, subRadical);
+        radicand = fms(static_cast<fp_t>(2.0L), x2, static_cast<fp_t>(2.0L)* sigma, subRadical);
+        radicand_ = fms(static_cast<fp_t>(2.0L), x2, static_cast<fp_t>(-2.0L)* sigma, subRadical);
     }
-        // - Иначе все корни резольвентного кубического уравнения вещественные
-    else {
+    // - Иначе все корни резольвентного кубического уравнения вещественные
+    else
+    {
         r = cubicRoots[2].real();
         if (r < 0)
             return 0;
@@ -785,29 +817,32 @@ unsigned int euler(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots)
 
         fp_t subRadical = sqrt(subradicand);
 
-        radicand = fma(static_cast<fp_t>(-2.0L) * sigma, subRadical, x2) + x3;
-        radicand_ = fma(static_cast<fp_t>(2.0L) * sigma, subRadical, x2) + x3;
+        radicand = fma(static_cast<fp_t>(-2.0L)* sigma, subRadical, x2) + x3;
+        radicand_ = fma(static_cast<fp_t>(2.0L)* sigma, subRadical, x2) + x3;
     }
 
     fp_t rootPart = sqrt(r) - C;
 
     // Если полученный радиканд (radicand) > 0 либо близок к 0, то уравнение имеет два либо больше вещественных решений
-    if (radicand >= 0) {
+    if (radicand >= 0)
+    {
         fp_t radical = sqrt(radicand);
 
         roots =
-                {
-                        rootPart + radical,
-                        rootPart - radical
-                };
+        {
+            rootPart + radical,
+            rootPart - radical
+        };
 
         numberOfRoots += 2;
-    } else if (abs(radicand) <= EPS) {
+    }
+    else if (abs(radicand) <= EPS)
+    {
         roots =
-                {
-                        rootPart,
-                        rootPart
-                };
+        {
+            rootPart,
+            rootPart
+        };
 
         numberOfRoots += 2;
     }
@@ -815,14 +850,17 @@ unsigned int euler(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots)
     rootPart = -sqrt(r) - C;
 
     // Если полученный радиканд (radicand_) > 0 либо близок к 0, то уравнение имеет два либо больше вещественных решений
-    if (radicand_ >= 0) {
+    if (radicand_ >= 0)
+    {
         fp_t radical = sqrt(radicand_);
 
         roots[numberOfRoots] = rootPart + radical;
         roots[numberOfRoots + 1] = rootPart - radical;
 
         numberOfRoots += 2;
-    } else if (abs(radicand_) <= EPS) {
+    }
+    else if (abs(radicand_) <= EPS)
+    {
         roots[numberOfRoots] = rootPart;
         roots[numberOfRoots + 1] = rootPart;
 
@@ -838,7 +876,8 @@ unsigned int euler(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots)
     Работу выполнил — Погосов Даниэль (https://github.com/DarklleS)
 */
 template<typename fp_t>
-unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t> &roots) {
+unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>& roots)
+{
     // Нормировка коэффициентов
     if (isZero(n) || isinf(a /= n))
         return solveCubic(a, b, c, d, roots);
@@ -852,22 +891,20 @@ unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t>
     // Объявление констант
     static const fp_t ONE_HALF = static_cast<fp_t>(0.5L);
     static const fp_t ONE_QUARTER = static_cast<fp_t>(0.25L);
-    static constexpr fp_t
-    EPS = numeric_limits<fp_t>::epsilon();
+    static constexpr fp_t EPS = numeric_limits<fp_t>::epsilon();
 
     // Количество вещественных корней
     unsigned numberOfRoots = 0;
 
     // Вычисляем расчетные коэффициенты
     fp_t C = a * ONE_QUARTER;
-    fp_t a_ = fma(static_cast<fp_t>(-6.0L) * C, C, b);
-    fp_t b_ = fma(fms(static_cast<fp_t>(8.0L) * C, C, static_cast<fp_t>(2.0L), b), C, c);
-    fp_t c_ = fma(fma(fma(static_cast<fp_t>(-3.0L) * C, C, b), C, -c), C, d);
+    fp_t a_ = fma(static_cast<fp_t>(-6.0L)* C, C, b);
+    fp_t b_ = fma(fms(static_cast<fp_t>(8.0L)* C, C, static_cast<fp_t>(2.0L), b), C, c);
+    fp_t c_ = fma(fma(fma(static_cast<fp_t>(-3.0L)* C, C, b), C, -c), C, d);
 
     // Решаем резольвентное кубическое уравнение вида: theta^3 - 2 * a_ * theta^2 + (a_^2 - 4 * c_) * theta + b_^2 = 0
-    vector <complex<fp_t>> cubicRoots(3);
-    unsigned numberOfCubicRoots = solveCubic(static_cast<fp_t>(1.0L), static_cast<fp_t>(-2.0L) * a_,
-                                             fms(a_, a_, static_cast<fp_t>(4.0L), c_), b_ * b_, cubicRoots);
+    vector<complex<fp_t>> cubicRoots(3);
+    unsigned numberOfCubicRoots = solveCubic(static_cast<fp_t>(1.0L), static_cast<fp_t>(-2.0L)* a_, fms(a_, a_, static_cast<fp_t>(4.0L), c_), b_* b_, cubicRoots);
 
     // Определяем знак радикандов
     fp_t sigma = b_ > 0 ? static_cast<fp_t>(1.0L) : static_cast<fp_t>(-1.0L);
@@ -880,7 +917,8 @@ unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t>
 
     // Вычисление радикандов. Разбераем 2 случая дабы оптимизировать вычисления
     // - Если решение резольвентного кубического уравнения имеет единственный вещественный корень
-    if (numberOfCubicRoots == 1) {
+    if (numberOfCubicRoots == 1)
+    {
         theta = cubicRoots[0].real();
         if (theta > 0)
             return 0;
@@ -896,11 +934,12 @@ unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t>
 
         fp_t subRadical = sqrt(subradicand);
 
-        radicand = fms(static_cast<fp_t>(-2.0L), x2, static_cast<fp_t>(2.0L) * sigma, subRadical);
-        radicand_ = fms(static_cast<fp_t>(-2.0L), x2, static_cast<fp_t>(-2.0L) * sigma, subRadical);
+        radicand = fms(static_cast<fp_t>(-2.0L), x2, static_cast<fp_t>(2.0L)* sigma, subRadical);
+        radicand_ = fms(static_cast<fp_t>(-2.0L), x2, static_cast<fp_t>(-2.0L)* sigma, subRadical);
     }
-        // - Иначе все корни резольвентного кубического уравнения вещественные
-    else {
+    // - Иначе все корни резольвентного кубического уравнения вещественные
+    else
+    {
         theta = cubicRoots[0].real();
         if (theta > 0)
             return 0;
@@ -916,8 +955,8 @@ unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t>
 
         fp_t subRadical = sqrt(subradicand);
 
-        radicand = fma(static_cast<fp_t>(-2.0L) * sigma, subRadical, -x2) - x3;
-        radicand_ = fma(static_cast<fp_t>(2.0L) * sigma, subRadical, -x2) - x3;
+        radicand = fma(static_cast<fp_t>(-2.0L)* sigma, subRadical, -x2) - x3;
+        radicand_ = fma(static_cast<fp_t>(2.0L)* sigma, subRadical, -x2) - x3;
     }
 
     fp_t sqrtTheta = sqrt(-theta);
@@ -925,22 +964,25 @@ unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t>
     fp_t rootPart = fma(ONE_HALF, sqrtTheta, -C);
 
     // Если полученный радиканд (radicand) > 0 либо близок к 0, то уравнение имеет два либо больше вещественных решений
-    if (radicand >= 0) {
+    if (radicand >= 0)
+    {
         fp_t radical = sqrt(radicand);
 
         roots =
-                {
-                        fma(ONE_HALF, radical, rootPart),
-                        fma(-ONE_HALF, radical, rootPart)
-                };
+        {
+            fma(ONE_HALF, radical, rootPart),
+            fma(-ONE_HALF, radical, rootPart)
+        };
 
         numberOfRoots += 2;
-    } else if (abs(radicand) <= EPS) {
+    }
+    else if (abs(radicand) <= EPS)
+    {
         roots =
-                {
-                        rootPart,
-                        rootPart
-                };
+        {
+            rootPart,
+            rootPart
+        };
 
         numberOfRoots += 2;
     }
@@ -948,14 +990,17 @@ unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t>
     rootPart = fma(-ONE_HALF, sqrtTheta, -C);
 
     // Если полученный радиканд (radicand_) > 0 либо близок к 0, то уравнение имеет два либо больше вещественных решений
-    if (radicand_ >= 0) {
+    if (radicand_ >= 0)
+    {
         fp_t radical = sqrt(radicand_);
 
         roots[numberOfRoots] = fma(ONE_HALF, radical, rootPart);
         roots[numberOfRoots + 1] = fma(-ONE_HALF, radical, rootPart);
 
         numberOfRoots += 2;
-    } else if (abs(radicand_) <= EPS) {
+    }
+    else if (abs(radicand_) <= EPS)
+    {
         roots[numberOfRoots] = rootPart;
         roots[numberOfRoots + 1] = rootPart;
 
@@ -965,66 +1010,11 @@ unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector <fp_t>
     return numberOfRoots;
 }
 
-/*
-    Имплементация метода решения уравнения четвертой степени — MANSFIELD MERRIMAN’s Method
-    Информация о методе — https://www.jstor.org/stable/2369666
-    Работу выполнил — Успенский Артём, Кукулиев Андрей
-    https://github.com/MadBunny0/Solution_of_the_Quartic_Equation-Merriman-1892
 
-    1 случай
-    Решение кубической резольвенты: y**3 + 3py**2 + 2qy + r = 0
-    При условии что h**2 - k > 0 !!!
-    y1 = -p + (s + t)
-    y2 = -p - 1/2(s+t) + 1/2(s-t) * sqrt(-3)
-    y3 = -p - 1/2(s+t) - 1/2(s-t) * sqrt(-3)
-    где p - коэффициент при y**2,
-        s = (h + sqrt(h**2 - k))**1/3,
-        t = (h - sqrt(h**2 - k))**1/3.
-        где h = 1/2(-2p**3 + 3pq - r),
-            k = (p**2 - q)**3
-
-    Подставим h, k в s, t:
-    s = (1/2(-2p**3 + 3pq - r) + sqrt((1/2(-2p**3 + 3pq - r))**2 - (p**2 - q)**3))**1/3
-    t = (1/2(-2p**3 + 3pq - r) - sqrt((1/2(-2p**3 + 3pq - r))**2 - (p**2 - q)**3))**1/3
-    Если p = 0, то  то для y становится формулой Кардана.
-
-    При условии что h**2 - k < 0 !!!
-    решения нет!
-
-    2 случай
-    Кубическая резольвента Эйлера (может уже реализована выше)
-    z**4 + 6Bz**2 + 4Cz + D = 0
-    пусть будет взята кубическая резольвента
-    y**3 + 3By**2 + 1/4(9B**2 -D)y - 1/4C**2 = 0
-    y1, y2, y3 - корни кубической резольвенты
-
-    Если C < 0, то
-    z1 = sqrt(y1) + sqrt(y2) + sqrt(y3)
-    z2 = sqrt(y1) - sqrt(y2) - sqrt(y3)
-    z3 = -sqrt(y1) + sqrt(y2) - sqrt(y3)
-    z4 = -sqrt(y1) - sqrt(y2) + sqrt(y3)
-
-    Если C > 0, то
-    z1 = -sqrt(y1) - sqrt(y2) - sqrt(y3)
-    z2 = -sqrt(y1) + sqrt(y2) + sqrt(y3)
-    z3 = sqrt(y1) - sqrt(y2) + sqrt(y3)
-    z4 = sqrt(y1) + sqrt(y2) - sqrt(y3)
-
-    3 случай
-    x**4 + 4ax**3 + 6bx**2 + 4cx + d = 0
-    Оно сводится заменой z-a к:
-    z**4 + 6Bz**2 + 4Cz + D = 0
-    пусть будет взята кубическая резольвента
-    y**3 + 3py**2 + 2qy + r = 0
-    Где p = -(a**2 - b)
-        q = (a**2 - b)**2 + 1/12(4ac - 3b**2 - d)
-        r = -1/4(2a**3 - 3ab + c)**2
-
-*/
 
 template<typename fp_t>
-unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector <fp_t> &roots) {
-    // Нормировка коэффициентов
+unsigned int merriman(/*fp_t n,*/ fp_t a_, fp_t b_, fp_t c_, fp_t d_/*, vector<fp_t>& roots*/) {
+    /*// Нормировка коэффициентов
     if (isZero(n) || isinf(a_ /= n))
         return solveCubic(a_, b_, c_, d_, roots);
     if (isinf(b_ /= n))
@@ -1033,7 +1023,7 @@ unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector <fp_t> 
         return 0;
     if (isinf(d_ /= n))
         return 0;
-
+       */
     // Объявление констант
     static const fp_t ONE_HALF = static_cast<fp_t>(0.5L);
     static const fp_t ONE_QUARTER = static_cast<fp_t>(0.25L);
@@ -1041,47 +1031,110 @@ unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector <fp_t> 
     static const fp_t ONE_THIRD = static_cast<fp_t>(1.0L / 3.0L);
 
     // Пересчёт переменных
-    static const fp_t a = a_ * ONE_QUARTER;
-    static const fp_t b = b_ * static_cast<fp_t>(1.0L / 3.0L);
-    static const fp_t c = c_ * ONE_QUARTER;
-    static const fp_t d = d_;
+    fp_t a = a_ * ONE_QUARTER;
+    fp_t b = b_ * static_cast<fp_t>(1.0L / 6.0L);
+    fp_t c = c_ * ONE_QUARTER;
+    fp_t d = d_;
 
     // Количество вещественных корней
-    unsigned numberOfRoots = 4;
-
-    // 2 пункт, если уравнение имеет вид
+    unsigned numberOfRoots = 0;
+    vector<fp_t> roots(4);
 
     // Вычисляем расчетные коэффициенты
-    fp_t m = fma(a * *2, d, b * *3 + c * *2) -
-             fms(static_cast<fp_t>(2.0L) * a, b * c, b, d); // (a^2 * d + b^3 + c^2) - (2abc - bd)
-    fp_t n = pow(pow(b, 2) + fms(ONE_THIRD, d, static_cast<fp_t>(4.0L / 3.0L), a * c), 3);      // (b^2  1/3d - 4/3ac)^3
+    fp_t m = pow(a, 2) * d + pow(b, 3) + pow(c, 2) - 2 * a * b * c - b * d; // (a^2 * d + b^3 + c^2) - (2abc - bd)
+    fp_t nn = pow(pow(b, 2) + ONE_THIRD * d - static_cast<fp_t>(4.0L / 3.0L) * a * c, 3);      // (b^2  1/3d - 4/3ac)^3
 
-    fp_t s = ONE_HALF * pow(m + sqrt(pow(m, 2) - n), ONE_THIRD); // 1/2 (m + sqrt(m^2 - n))^1/3
-    fp_t t = ONE_HALF * pow(m - sqrt(pow(m, 2) - n), ONE_THIRD); // 1/2 (m - sqrt(m^2 - n))^1/3
+    if (m * m - nn > 0) {
+        fp_t s1 = m + sqrt(pow(m, 2) - nn);
+        fp_t s = ONE_HALF * pow(s1, ONE_THIRD); // 1/2 (m + sqrt(m^2 - n))^1/3
 
-    fp_t u = pow(a, 2) - b + s + t; // a^2 - b + s + t
-    fp_t v = fms(static_cast<fp_t>(2.0L), a * a, static_cast<fp_t>(2.0L), b) - s - t; // 2a^2 - 2b - s - t
-    fp_t w = fms(static_cast<fp_t>(3.0L), s * s, static_cast<fp_t>(6.0L) * s, t) +
-             fma(v, v, static_cast<fp_t>(3.0L) * t * t); // v^2 + 3s^2 - 6st + 3t^2
+        fp_t j = (m - sqrt(pow(m, 2) - nn) < 0) ? -1 : 1;
+        fp_t t1 = j*(m - sqrt(pow(m, 2) - nn));
 
-    if (fma(static_cast<fp_t>(2.0L), a*a*a, static_cast<fp_t>(3.0L), a * b) + c < 0) {
-        roots[0] = -a + sqrt(u) + sqrt(v + sqrt(w));
-        roots[1] = -a + sqrt(u) - sqrt(v + sqrt(w));
-        roots[2] = -a - sqrt(u) + sqrt(v - sqrt(w));
-        roots[3] = -a - sqrt(u) - sqrt(v - sqrt(w));
-    } else {
-        roots[0] = -a - sqrt(u) - sqrt(v + sqrt(w));
-        roots[1] = -a - sqrt(u) + sqrt(v + sqrt(w));
-        roots[2] = -a + sqrt(u) - sqrt(v - sqrt(w));
-        roots[3] = -a + sqrt(u) + sqrt(v - sqrt(w));
+        fp_t t = j*ONE_HALF * pow(t1, ONE_THIRD); // 1/2 (m - sqrt(m^2 - n))^1/3
+
+        fp_t u = pow(a, 2) - b + s + t; // a^2 - b + s + t
+        fp_t v = fms(static_cast<fp_t>(2.0L), a * a, static_cast<fp_t>(2.0L), b) - s - t; // 2a^2 - 2b - s - t
+        fp_t w = fms(static_cast<fp_t>(3.0L), s * s, static_cast<fp_t>(6.0L) * s, t) +
+            fma(v, v, static_cast<fp_t>(3.0L) * t * t); // v^2 + 3s^2 - 6st + 3t^2
+
+        if ((fms(static_cast<fp_t>(2.0L), a * a * a, static_cast<fp_t>(3.0L), a * b) + c) < 0) {
+            roots[0] = -a + sqrt(u) + sqrt(v + sqrt(w));
+            roots[1] = -a + sqrt(u) - sqrt(v + sqrt(w));
+            roots[2] = -a - sqrt(u); //УБРАЛИ МНИМУЮ ЧАСТЬ
+            roots[3] = -a - sqrt(u); //УБРАЛИ МНИМУЮ ЧАСТЬ
+        }
+        else {
+            roots[0] = -a - sqrt(u) - sqrt(v + sqrt(w));
+            roots[1] = -a - sqrt(u) + sqrt(v + sqrt(w));
+            roots[2] = -a + sqrt(u); //УБРАЛИ МНИМУЮ ЧАСТЬ
+            roots[3] = -a + sqrt(u); //УБРАЛИ МНИМУЮ ЧАСТЬ
+        }
+        numberOfRoots = 4;
     }
+    else if (m * m - nn == 0) {
 
+
+        fp_t u = pow(a, 2) - b + pow(nn, static_cast<fp_t>(1.0L / 6.0L)); // a^2 - b + n^1/6
+        fp_t v = 2*(pow(a, 2) - b) - pow(nn, static_cast<fp_t>(1.0L / 6.0L)); // 2a^2 - 2b
+
+        if (v == 0) {
+            if ((fms(static_cast<fp_t>(2.0L), a * a * a, static_cast<fp_t>(3.0L), a * b) + c) < 0) {
+                roots[0] = -a + sqrt(3*(a*a - b));
+                roots[1] = -a - sqrt(3 * (a * a - b));
+            }
+            else {
+                roots[0] = -a - sqrt(3 * (a * a - b));
+                roots[1] = -a + sqrt(3 * (a * a - b));
+            }
+            numberOfRoots = 2;
+        }
+        else {
+            if ((fms(static_cast<fp_t>(2.0L), a * a * a, static_cast<fp_t>(3.0L), a * b) + c) < 0) {
+                roots[0] = -a + sqrt(u) + sqrt(2 * v);
+                roots[1] = -a + sqrt(u) - sqrt(2 * v);
+                roots[2] = -a - sqrt(u);
+            }
+            else {
+                roots[0] = -a - sqrt(u) - sqrt(2 * v);
+                roots[1] = -a - sqrt(u) + sqrt(2 * v);
+                roots[2] = -a + sqrt(u);
+            }
+            numberOfRoots = 3;
+        }
+    }
+    else if (m == 0){
+        fp_t u = pow(a, 2) - b; // a^2 - b
+        fp_t v = fms(static_cast<fp_t>(2.0L), a * a, static_cast<fp_t>(2.0L), b); // 2a^2 - 2b
+        fp_t w = pow(v,2) - 3*pow(b, 2) - d; // v^2 - 3b^2 + d
+
+        if ((fms(static_cast<fp_t>(2.0L), a * a * a, static_cast<fp_t>(3.0L), a * b) + c) < 0) {
+            roots[0] = -a - sqrt(u) - sqrt(v + sqrt(w));
+            roots[1] = -a - sqrt(u) + sqrt(v + sqrt(w));
+            roots[2] = -a + sqrt(u) - sqrt(v - sqrt(w));
+            roots[3] = -a + sqrt(u) + sqrt(v - sqrt(w));
+        }
+        else {
+            roots[0] = -a + sqrt(u) + sqrt(v + sqrt(w));
+            roots[1] = -a + sqrt(u) - sqrt(v + sqrt(w));
+            roots[2] = -a - sqrt(u) + sqrt(v - sqrt(w));
+            roots[3] = -a - sqrt(u) - sqrt(v - sqrt(w));
+        }
+        numberOfRoots = 4;
+    }
+    else {
+        cout << "method is bullshit!!!";
+        return 0;
+    }
+    cout << roots[0] << " " << roots[1] << " " << roots[2] << " " << roots[3];
     return numberOfRoots;
 }
+
 // ======================== ФУНКЦИИ ТЕСТИРОВАНИЯ МЕТОДОВ ======================== //
 
 template<typename fp_t>
-void testCubicPolynomial(int testCount, long double maxDistance) {
+void testCubicPolynomial(int testCount, long double maxDistance)
+{
     unsigned P = 3; // Степень исходного полинома
     fp_t low = -1, high = 1; // Интервал на котором заданы корни полинома
     fp_t absMaxError, relMaxError; // Абсолютная и относительная погрешность по итогам пройденного теста
@@ -1089,19 +1142,20 @@ void testCubicPolynomial(int testCount, long double maxDistance) {
     long double absErrorAvg = 0, relErrorAvg = 0; // Средняя абсолютная и относительная погрешность по итогам всех тестов
     unsigned numberOfFoundRoots; // Количество найденных корней
     unsigned cantFind = 0; // Счетчик количества ситуаций, когда методу не удалось найти корни (numberOfFoundRoots == 0)
-    vector <fp_t> coefficients(P + 1); // Вектор коэффициентов полинома
+    vector<fp_t> coefficients(P + 1); // Вектор коэффициентов полинома
     unsigned count = 0; // Счетчик количества ситуаций, когда относительная погрешность больше определенного числа (relMaxError > n)
 
-    for (size_t i = 0; i < testCount; ++i) {
-        vector <fp_t> foundRoots(P);
-        vector <fp_t> trueRoots(P);
+    for (size_t i = 0; i < testCount; ++i)
+    {
+        vector<fp_t> foundRoots(P);
+        vector<fp_t> trueRoots(P);
 
-        generate_polynomial<fp_t>(P, 0, P, 0, static_cast<fp_t>(maxDistance), low, high, trueRoots, coefficients);
+        generate_polynomial<fp_t>(P, 0, 0, 0, static_cast<fp_t>(maxDistance), low, high, trueRoots, coefficients);
 
-        numberOfFoundRoots = solveCubic<fp_t>(coefficients[3], coefficients[2], coefficients[1], coefficients[0],
-                                              foundRoots);
+        numberOfFoundRoots = solveCubic<fp_t>(coefficients[3], coefficients[2], coefficients[1], coefficients[0], foundRoots);
 
-        if (numberOfFoundRoots > 0) {
+        if (numberOfFoundRoots > 0)
+        {
             compare_roots<fp_t>(numberOfFoundRoots, P, foundRoots, trueRoots, absMaxError, relMaxError);
 
             absMaxErrorTotal = absMaxError > absMaxErrorTotal ? absMaxError : absMaxErrorTotal;
@@ -1111,14 +1165,16 @@ void testCubicPolynomial(int testCount, long double maxDistance) {
             relErrorAvg += relMaxError;
 
             count += relMaxError > 1 ? 1 : 0;
-        } else
+        }
+        else
             cantFind += 1;
     }
 
     absErrorAvg /= (testCount - cantFind);
     relErrorAvg /= (testCount - cantFind);
 
-    if (PRINT) {
+    if (PRINT)
+    {
         cout << "CUBIC TEST RESULTS" << endl;
         cout << "========================================" << endl;
         cout << "Max distance: " << maxDistance << endl;
@@ -1134,7 +1190,8 @@ void testCubicPolynomial(int testCount, long double maxDistance) {
 }
 
 template<typename fp_t>
-void testQuarticPolynomial(int testCount, long double maxDistance) {
+void testQuarticPolynomial(int testCount, long double maxDistance)
+{
     unsigned P = 4; // Степень исходного полинома
     fp_t low = -1, high = 1; // Интервал на котором заданы корни полинома
     fp_t absMaxError, relMaxError; // Абсолютная и относительная погрешность по итогам пройденного теста
@@ -1142,25 +1199,25 @@ void testQuarticPolynomial(int testCount, long double maxDistance) {
     long double absErrorAvg = 0, relErrorAvg = 0; // Средняя абсолютная и относительная погрешность по итогам всех тестов
     unsigned numberOfFoundRoots; // Количество найденных корней
     unsigned cantFind = 0; // Счетчик количества ситуаций, когда методу не удалось найти корни (numberOfFoundRoots == 0)
-    vector <fp_t> coefficients(P + 1); // Вектор коэффициентов полинома
+    vector<fp_t> coefficients(P + 1); // Вектор коэффициентов полинома
     unsigned count = 0; // Счетчик количества ситуаций, когда относительная погрешность больше определенного числа (relMaxError > n)
     int countExcessRoots = 0;
     int countLostRoots = 0;
 
-    for (size_t i = 0; i < testCount; ++i) {
-        vector <fp_t> foundRoots(P);
-        vector <fp_t> trueRoots(P);
+    for (size_t i = 0; i < testCount; ++i)
+    {
+        vector<fp_t> foundRoots(P);
+        vector<fp_t> trueRoots(P);
         int excessRoots = 0;
         int lostRoots = 0;
 
-        generate_polynomial<fp_t>(P, 0, 0, 0, static_cast<fp_t>(maxDistance), low, high, trueRoots, coefficients);
+        generate_polynomial<fp_t>(P, 0, P, 0, static_cast<fp_t>(maxDistance), low, high, trueRoots, coefficients);
 
-        numberOfFoundRoots = merriman<fp_t>(coefficients[4], coefficients[3], coefficients[2], coefficients[1],
-                                         coefficients[0], foundRoots);
+        numberOfFoundRoots = merriman<fp_t>(coefficients[4], coefficients[3], coefficients[2], coefficients[1], coefficients[0], foundRoots);
 
-        if (numberOfFoundRoots > 0) {
-            compare_roots<fp_t>(numberOfFoundRoots, P, foundRoots, trueRoots, absMaxError, relMaxError, excessRoots,
-                                lostRoots);
+        if (numberOfFoundRoots > 0)
+        {
+            compare_roots<fp_t>(numberOfFoundRoots, P, foundRoots, trueRoots, absMaxError, relMaxError, excessRoots, lostRoots);
 
             absMaxErrorTotal = absMaxError > absMaxErrorTotal ? absMaxError : absMaxErrorTotal;
             absErrorAvg += absMaxError;
@@ -1172,7 +1229,9 @@ void testQuarticPolynomial(int testCount, long double maxDistance) {
             countLostRoots += lostRoots;
 
             count += relMaxError > 1 ? 1 : 0;
-        } else {
+        }
+        else
+        {
             countLostRoots += 4;
             cantFind += 1;
         }
@@ -1181,7 +1240,8 @@ void testQuarticPolynomial(int testCount, long double maxDistance) {
     absErrorAvg /= (testCount - cantFind);
     relErrorAvg /= (testCount - cantFind);
 
-    if (PRINT) {
+    if (PRINT)
+    {
         cout << "QUARTIC TEST RESULTS" << endl;
         cout << "========================================" << endl;
         cout << "Max distance: " << maxDistance << endl;
@@ -1201,6 +1261,8 @@ void testQuarticPolynomial(int testCount, long double maxDistance) {
     }
 }
 
-int main() {
-    testQuarticPolynomial<fp_t>(10000000, 1e-5);
+int main()
+{
+    //testQuarticPolynomial<fp_t>(10000, 1e-5);
+    float a = merriman<float>(0, -30, -20, 20);
 }
