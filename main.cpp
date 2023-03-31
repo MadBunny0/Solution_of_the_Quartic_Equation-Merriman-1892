@@ -1013,8 +1013,8 @@ unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>&
 
 
 template<typename fp_t>
-unsigned int merriman(/*fp_t n,*/ fp_t a_, fp_t b_, fp_t c_, fp_t d_/*, vector<fp_t>& roots*/) {
-    /*// Нормировка коэффициентов
+unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector<fp_t>& roots) {
+    // Нормировка коэффициентов
     if (isZero(n) || isinf(a_ /= n))
         return solveCubic(a_, b_, c_, d_, roots);
     if (isinf(b_ /= n))
@@ -1023,110 +1023,162 @@ unsigned int merriman(/*fp_t n,*/ fp_t a_, fp_t b_, fp_t c_, fp_t d_/*, vector<f
         return 0;
     if (isinf(d_ /= n))
         return 0;
-       */
+
     // Объявление констант
     static const fp_t ONE_HALF = static_cast<fp_t>(0.5L);
     static const fp_t ONE_QUARTER = static_cast<fp_t>(0.25L);
     static const fp_t NINE_QUARTER = static_cast<fp_t>(2.25L);
+    static const fp_t ONE_SIXTH = static_cast<fp_t>(1.0L / 6.0L);
     static const fp_t ONE_THIRD = static_cast<fp_t>(1.0L / 3.0L);
+    static const fp_t FOUR_THIRD = static_cast<fp_t>(4.0L / 3.0L);
+    static const fp_t TWO = static_cast<fp_t>(2.0L);
+    static const fp_t THREE = static_cast<fp_t>(3.0L);
+    static const fp_t SIX = static_cast<fp_t>(6.0L);
+    static const fp_t NINE = static_cast<fp_t>(9.0L);
 
     // Пересчёт переменных
     fp_t a = a_ * ONE_QUARTER;
-    fp_t b = b_ * static_cast<fp_t>(1.0L / 6.0L);
+    fp_t b = b_ * ONE_SIXTH;
     fp_t c = c_ * ONE_QUARTER;
     fp_t d = d_;
 
     // Количество вещественных корней
     unsigned numberOfRoots = 0;
-    vector<fp_t> roots(4);
+    //vector<fp_t> roots(4);
 
     // Вычисляем расчетные коэффициенты
-    fp_t m = pow(a, 2) * d + pow(b, 3) + pow(c, 2) - 2 * a * b * c - b * d; // (a^2 * d + b^3 + c^2) - (2abc - bd)
-    fp_t nn = pow(pow(b, 2) + ONE_THIRD * d - static_cast<fp_t>(4.0L / 3.0L) * a * c, 3);      // (b^2  1/3d - 4/3ac)^3
+    fp_t m = fms(pow(a, TWO), d, -pow(b, TWO), b) + fms(c, c, TWO * a * b, c) - b * d; // a^2 * d + b^3 + c^2 - 2abc - bd
+    fp_t nn = pow(b*b + fms(ONE_THIRD, d, FOUR_THIRD, a * c), THREE);      // (b^2 + 1/3d - 4/3ac)^3
 
-    if (m * m - nn > 0) {
-        fp_t s1 = m + sqrt(pow(m, 2) - nn);
+    // переменная для развитвления логики m^2 - n: приводит к разным u,v,w
+    fp_t radical = fma(m, m, - nn);
+    // переменная для развитвления логики 2a^3 - 3ab + c: определяет знаки в корнях
+    fp_t cond_coef = fms(TWO, pow(a, THREE), THREE, a * b) + c;
+
+    /*
+    if (isZero(a) && isZero(c)) {
+        fp_t roots_term = sqrt(fma(NINE, pow(b,TWO), -d));
+        roots[0] = sqrt(fma(-THREE, b, roots_term));
+        roots[1] = -roots[0];
+
+        cout << "a == 0, c == 0" << endl;
+
+        numberOfRoots = 2;
+        //cout << roots[0] << " " << roots[1] << " " << roots[2] << " " << roots[3];
+        return numberOfRoots;
+    }
+
+    if (isZero(d)) {
+        cout << "d == 0";
+        return 0;
+    }
+    */
+
+    if (radical > 0) {
+        fp_t s1 = m + sqrt(radical);
         fp_t s = ONE_HALF * pow(s1, ONE_THIRD); // 1/2 (m + sqrt(m^2 - n))^1/3
 
-        fp_t j = (m - sqrt(pow(m, 2) - nn) < 0) ? -1 : 1;
-        fp_t t1 = j*(m - sqrt(pow(m, 2) - nn));
+        fp_t j = (m - sqrt(radical) < 0) ? -1 : 1;
+        fp_t t1 = j*(m - sqrt(radical));
 
         fp_t t = j*ONE_HALF * pow(t1, ONE_THIRD); // 1/2 (m - sqrt(m^2 - n))^1/3
 
-        fp_t u = pow(a, 2) - b + s + t; // a^2 - b + s + t
-        fp_t v = fms(static_cast<fp_t>(2.0L), a * a, static_cast<fp_t>(2.0L), b) - s - t; // 2a^2 - 2b - s - t
-        fp_t w = fms(static_cast<fp_t>(3.0L), s * s, static_cast<fp_t>(6.0L) * s, t) +
-            fma(v, v, static_cast<fp_t>(3.0L) * t * t); // v^2 + 3s^2 - 6st + 3t^2
+        fp_t u = fma(a, a, -b) + s + t; // a^2 - b + s + t
+        fp_t v = fms(TWO, pow(a, TWO), TWO, b) - s - t; // 2a^2 - 2b - s - t
+        fp_t w = fms(THREE, pow(s, TWO), SIX * s, t) +
+            fma(v, v, THREE * pow(t, TWO)); // v^2 + 3s^2 - 6st + 3t^2
 
-        if ((fms(static_cast<fp_t>(2.0L), a * a * a, static_cast<fp_t>(3.0L), a * b) + c) < 0) {
-            roots[0] = -a + sqrt(u) + sqrt(v + sqrt(w));
-            roots[1] = -a + sqrt(u) - sqrt(v + sqrt(w));
-            roots[2] = -a - sqrt(u); //УБРАЛИ МНИМУЮ ЧАСТЬ
-            roots[3] = -a - sqrt(u); //УБРАЛИ МНИМУЮ ЧАСТЬ
+        fp_t roots_term_1 = sqrt(u);
+        fp_t roots_term_2 = sqrt(v + sqrt(w));
+
+        if (cond_coef < 0) {
+            roots[0] = -a + roots_term_1 + roots_term_2;
+            roots[1] = -a + roots_term_1 - roots_term_2;
+            roots[2] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+            roots[3] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
         }
         else {
-            roots[0] = -a - sqrt(u) - sqrt(v + sqrt(w));
-            roots[1] = -a - sqrt(u) + sqrt(v + sqrt(w));
-            roots[2] = -a + sqrt(u); //УБРАЛИ МНИМУЮ ЧАСТЬ
-            roots[3] = -a + sqrt(u); //УБРАЛИ МНИМУЮ ЧАСТЬ
+            roots[0] = -a - roots_term_1 - roots_term_2;
+            roots[1] = -a - roots_term_1 + roots_term_2;
+            roots[2] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+            roots[3] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
         }
+        //cout << "m * m - nn > 0" << endl;
         numberOfRoots = 4;
     }
-    else if (m * m - nn == 0) {
+    else if (isZero(radical)) {
 
 
-        fp_t u = pow(a, 2) - b + pow(nn, static_cast<fp_t>(1.0L / 6.0L)); // a^2 - b + n^1/6
-        fp_t v = 2*(pow(a, 2) - b) - pow(nn, static_cast<fp_t>(1.0L / 6.0L)); // 2a^2 - 2b
+        fp_t u = fma(a, a, - b) + pow(nn, ONE_SIXTH); // a^2 - b + n^1/6
+        fp_t v = fms(TWO,pow(a, TWO), TWO, b) - pow(nn, ONE_SIXTH); // 2a^2 - 2b - n^1/6
 
-        if (v == 0) {
-            if ((fms(static_cast<fp_t>(2.0L), a * a * a, static_cast<fp_t>(3.0L), a * b) + c) < 0) {
-                roots[0] = -a + sqrt(3*(a*a - b));
-                roots[1] = -a - sqrt(3 * (a * a - b));
+        if (isZero(v)) {
+            fp_t roots_term = sqrt(fms(THREE, pow(a, TWO), THREE, b));
+
+            if (cond_coef < 0) {
+                roots[0] = -a + roots_term;
+                roots[1] = roots[0];
+                roots[2] = -a - roots_term;
+                roots[3] = roots[2];
             }
             else {
-                roots[0] = -a - sqrt(3 * (a * a - b));
-                roots[1] = -a + sqrt(3 * (a * a - b));
+                roots[0] = -a - roots_term;
+                roots[1] = roots[0];
+                roots[2] = -a + roots_term;
+                roots[3] = roots[2];
             }
-            numberOfRoots = 2;
+            //cout << "m * m - nn == 0, v == 0" << endl;
+            numberOfRoots = 4;
         }
         else {
-            if ((fms(static_cast<fp_t>(2.0L), a * a * a, static_cast<fp_t>(3.0L), a * b) + c) < 0) {
-                roots[0] = -a + sqrt(u) + sqrt(2 * v);
-                roots[1] = -a + sqrt(u) - sqrt(2 * v);
-                roots[2] = -a - sqrt(u);
+            fp_t roots_term_1 = sqrt(u);
+            fp_t roots_term_2 = sqrt(TWO * v);
+
+            if (cond_coef < 0) {
+                roots[0] = -a + roots_term_1 + roots_term_2;
+                roots[1] = -a + roots_term_1 - roots_term_2;
+                roots[2] = -a - roots_term_1;
+                roots[3] = roots[2];
             }
             else {
-                roots[0] = -a - sqrt(u) - sqrt(2 * v);
-                roots[1] = -a - sqrt(u) + sqrt(2 * v);
-                roots[2] = -a + sqrt(u);
+                roots[0] = -a - roots_term_1 - roots_term_2;
+                roots[1] = -a - roots_term_1 + roots_term_2;
+                roots[2] = -a + roots_term_1;
+                roots[3] = roots[2];
             }
-            numberOfRoots = 3;
+            //cout << "m * m - nn == 0, v != 0" << endl;
+            numberOfRoots = 4;
         }
     }
-    else if (m == 0){
-        fp_t u = pow(a, 2) - b; // a^2 - b
-        fp_t v = fms(static_cast<fp_t>(2.0L), a * a, static_cast<fp_t>(2.0L), b); // 2a^2 - 2b
-        fp_t w = pow(v,2) - 3*pow(b, 2) - d; // v^2 - 3b^2 + d
+    else if (isZero(m)){
+        fp_t u = fma(a,a, - b); // a^2 - b
+        fp_t v = fms(TWO, pow(a, TWO), TWO, b); // 2a^2 - 2b
+        fp_t w = fms(v, v, THREE, pow(b, TWO)) - d; // v^2 - 3b^2 - d
 
-        if ((fms(static_cast<fp_t>(2.0L), a * a * a, static_cast<fp_t>(3.0L), a * b) + c) < 0) {
-            roots[0] = -a - sqrt(u) - sqrt(v + sqrt(w));
-            roots[1] = -a - sqrt(u) + sqrt(v + sqrt(w));
-            roots[2] = -a + sqrt(u) - sqrt(v - sqrt(w));
-            roots[3] = -a + sqrt(u) + sqrt(v - sqrt(w));
+        fp_t roots_term_1 = sqrt(u);
+        fp_t roots_term_2 = sqrt(v + sqrt(w));
+        fp_t roots_term_3 = sqrt(v - sqrt(w));
+
+        if (cond_coef < 0) {
+            roots[0] = -a - roots_term_1 - roots_term_2;
+            roots[1] = -a - roots_term_1 + roots_term_2;
+            roots[2] = -a + roots_term_1 - roots_term_3;
+            roots[3] = -a + roots_term_1 + roots_term_3;
         }
         else {
-            roots[0] = -a + sqrt(u) + sqrt(v + sqrt(w));
-            roots[1] = -a + sqrt(u) - sqrt(v + sqrt(w));
-            roots[2] = -a - sqrt(u) + sqrt(v - sqrt(w));
-            roots[3] = -a - sqrt(u) - sqrt(v - sqrt(w));
+            roots[0] = -a + roots_term_1 + roots_term_2;
+            roots[1] = -a + roots_term_1 - roots_term_2;
+            roots[2] = -a - roots_term_1 + roots_term_3;
+            roots[3] = -a - roots_term_1 - roots_term_3;
         }
+        //cout << "m == 0" << endl;
         numberOfRoots = 4;
     }
     else {
-        cout << "method is bullshit!!!";
+        //cout << "Irreducible case" << endl;
         return 0;
     }
-    cout << roots[0] << " " << roots[1] << " " << roots[2] << " " << roots[3];
+    //cout << roots[0] << " " << roots[1] << " " << roots[2] << " " << roots[3];
     return numberOfRoots;
 }
 
@@ -1263,6 +1315,6 @@ void testQuarticPolynomial(int testCount, long double maxDistance)
 
 int main()
 {
-    //testQuarticPolynomial<fp_t>(10000, 1e-5);
-    float a = merriman<float>(0, -30, -20, 20);
+    testQuarticPolynomial<fp_t>(10'000'000, 1e-5);
+    //float a = merriman<float>(0, 9, 0, -1);
 }
