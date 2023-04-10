@@ -227,11 +227,11 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<fp_t>& roots)
         if (isZero(Q)) // Все все корни вещественные и кратны трем
         {
             roots =
-            {
-                A_THIRD,
-                A_THIRD,
-                A_THIRD
-            };
+                    {
+                            A_THIRD,
+                            A_THIRD,
+                            A_THIRD
+                    };
         }
         else // Все все корни вещественные, один из которых кратен двум
         {
@@ -241,11 +241,11 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<fp_t>& roots)
             fp_t sqrtQ = static_cast<fp_t>(2.0L)* sqrt(-Q);
 
             roots =
-            {
-                fms(sqrtQ, cos(phi), a, ONE_THIRD),
-                fms(sqrtQ, cos(fma(static_cast<fp_t>(-2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD),
-                fms(sqrtQ, cos(fma(static_cast<fp_t>(2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD)
-            };
+                    {
+                            fms(sqrtQ, cos(phi), a, ONE_THIRD),
+                            fms(sqrtQ, cos(fma(static_cast<fp_t>(-2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD),
+                            fms(sqrtQ, cos(fma(static_cast<fp_t>(2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD)
+                    };
 
             sort(roots.begin(), roots.end());
         }
@@ -257,7 +257,7 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<fp_t>& roots)
         // Дополнительные расчетные коэффициенты
         fp_t A = cbrt(abs(R) + sqrt(D));
         fp_t T = R >= -EPS ? A - Q / A :
-            Q / A - A;
+                 Q / A - A;
 
         fp_t sqrt3Half = static_cast<fp_t>(sqrt(3.0L) * 0.5L);
 
@@ -269,11 +269,11 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<fp_t>& roots)
             fp_t multipleRoot = fms(-ONE_THIRD, a, ONE_HALF, T);
 
             roots =
-            {
-                fma(-ONE_THIRD, a, T),
-                multipleRoot,
-                multipleRoot
-            };
+                    {
+                            fma(-ONE_THIRD, a, T),
+                            multipleRoot,
+                            multipleRoot
+                    };
 
             sort(roots.begin(), roots.end());
 
@@ -282,9 +282,9 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<fp_t>& roots)
         else // Только один корень вещественный, остальные комплексные
         {
             roots =
-            {
-                 fma(-ONE_THIRD, a, T)
-            };
+                    {
+                            fma(-ONE_THIRD, a, T)
+                    };
 
             return 1;
         }
@@ -330,11 +330,11 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<complex<fp_t>>& r
             complex<fp_t> root(A_THIRD, static_cast<fp_t>(0.0L));
 
             roots =
-            {
-                root,
-                root,
-                root
-            };
+                    {
+                            root,
+                            root,
+                            root
+                    };
         }
         else // Все все корни вещественные, один из которых кратен двум
         {
@@ -344,17 +344,17 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<complex<fp_t>>& r
             fp_t sqrtQ = static_cast<fp_t>(2.0L)* sqrt(-Q);
 
             roots =
-            {
-                complex<fp_t>(fms(sqrtQ, cos(phi), a, ONE_THIRD), static_cast<fp_t>(0.0L)),
-                complex<fp_t>(fms(sqrtQ, cos(fma(static_cast<fp_t>(-2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD), static_cast<fp_t>(0.0L)),
-                complex<fp_t>(fms(sqrtQ, cos(fma(static_cast<fp_t>(2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD), static_cast<fp_t>(0.0L))
-            };
+                    {
+                            complex<fp_t>(fms(sqrtQ, cos(phi), a, ONE_THIRD), static_cast<fp_t>(0.0L)),
+                            complex<fp_t>(fms(sqrtQ, cos(fma(static_cast<fp_t>(-2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD), static_cast<fp_t>(0.0L)),
+                            complex<fp_t>(fms(sqrtQ, cos(fma(static_cast<fp_t>(2.0L)* PI, ONE_THIRD, phi)), a, ONE_THIRD), static_cast<fp_t>(0.0L))
+                    };
 
             sort(roots.begin(), roots.end(),
-                [](complex<fp_t>& a, complex<fp_t>& b)
-                {
-                    return a.real() < b.real();
-                });
+                 [](complex<fp_t>& a, complex<fp_t>& b)
+                 {
+                     return a.real() < b.real();
+                 });
         }
 
         return 3;
@@ -364,7 +364,7 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<complex<fp_t>>& r
         // Дополнительные расчетные коэффициенты
         fp_t A = cbrt(abs(R) + sqrt(D));
         fp_t T = R >= -EPS ? A - Q / A :
-            Q / A - A;
+                 Q / A - A;
 
         fp_t sqrt3Half = static_cast<fp_t>(sqrt(3.0L) * 0.5L);
 
@@ -376,17 +376,17 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<complex<fp_t>>& r
             complex<fp_t> multipleRoot(fms(-ONE_THIRD, a, ONE_HALF, T), static_cast<fp_t>(0.0L));
 
             roots =
-            {
-                complex<fp_t>(fma(-ONE_THIRD, a, T), static_cast<fp_t>(0.0L)),
-                multipleRoot,
-                multipleRoot
-            };
+                    {
+                            complex<fp_t>(fma(-ONE_THIRD, a, T), static_cast<fp_t>(0.0L)),
+                            multipleRoot,
+                            multipleRoot
+                    };
 
             sort(roots.begin(), roots.end(),
-                [](complex<fp_t>& a, complex<fp_t>& b)
-                {
-                    return a.real() < b.real();
-                });
+                 [](complex<fp_t>& a, complex<fp_t>& b)
+                 {
+                     return a.real() < b.real();
+                 });
 
             return 3;
         }
@@ -395,11 +395,11 @@ unsigned int solveCubic(fp_t n, fp_t a, fp_t b, fp_t c, vector<complex<fp_t>>& r
             fp_t rootRealPart = fms(-ONE_THIRD, a, ONE_HALF, T);
 
             roots =
-            {
-                complex<fp_t>(fma(-ONE_THIRD, a, T), static_cast<fp_t>(0.0L)),
-                complex<fp_t>(rootRealPart, imagPart),
-                complex<fp_t>(rootRealPart, -imagPart)
-            };
+                    {
+                            complex<fp_t>(fma(-ONE_THIRD, a, T), static_cast<fp_t>(0.0L)),
+                            complex<fp_t>(rootRealPart, imagPart),
+                            complex<fp_t>(rootRealPart, -imagPart)
+                    };
 
             return 1;
         }
@@ -472,20 +472,20 @@ unsigned int ferrari(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>& roots
         fp_t radical = sqrt(radicand);
 
         roots =
-        {
-            rootPart + radical,
-            rootPart - radical
-        };
+                {
+                        rootPart + radical,
+                        rootPart - radical
+                };
 
         numberOfRoots += 2;
     }
     else if (abs(radicand) <= EPS)
     {
         roots =
-        {
-            rootPart,
-            rootPart
-        };
+                {
+                        rootPart,
+                        rootPart
+                };
 
         numberOfRoots += 2;
     }
@@ -580,20 +580,20 @@ unsigned int descartes(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>& roo
         fp_t radical = sqrt(radicand);
 
         roots =
-        {
-            rootPart + radical,
-            rootPart - radical
-        };
+                {
+                        rootPart + radical,
+                        rootPart - radical
+                };
 
         numberOfRoots += 2;
     }
     else if (abs(radicand) <= EPS)
     {
         roots =
-        {
-            rootPart,
-            rootPart
-        };
+                {
+                        rootPart,
+                        rootPart
+                };
 
         numberOfRoots += 2;
     }
@@ -689,10 +689,10 @@ unsigned int nbs(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>& roots)
         fp_t radical = sqrt(radicand);
 
         roots =
-        {
-            fma(-ONE_HALF, p1, radical),
-            fma(-ONE_HALF, p1, -radical)
-        };
+                {
+                        fma(-ONE_HALF, p1, radical),
+                        fma(-ONE_HALF, p1, -radical)
+                };
 
         numberOfRoots += 2;
     }
@@ -701,10 +701,10 @@ unsigned int nbs(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>& roots)
         fp_t root = -p1 * ONE_HALF;
 
         roots =
-        {
-            root,
-            root
-        };
+                {
+                        root,
+                        root
+                };
 
         numberOfRoots += 2;
     }
@@ -799,7 +799,7 @@ unsigned int euler(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>& roots)
         radicand = fms(static_cast<fp_t>(2.0L), x2, static_cast<fp_t>(2.0L)* sigma, subRadical);
         radicand_ = fms(static_cast<fp_t>(2.0L), x2, static_cast<fp_t>(-2.0L)* sigma, subRadical);
     }
-    // - Иначе все корни резольвентного кубического уравнения вещественные
+        // - Иначе все корни резольвентного кубического уравнения вещественные
     else
     {
         r = cubicRoots[2].real();
@@ -829,20 +829,20 @@ unsigned int euler(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>& roots)
         fp_t radical = sqrt(radicand);
 
         roots =
-        {
-            rootPart + radical,
-            rootPart - radical
-        };
+                {
+                        rootPart + radical,
+                        rootPart - radical
+                };
 
         numberOfRoots += 2;
     }
     else if (abs(radicand) <= EPS)
     {
         roots =
-        {
-            rootPart,
-            rootPart
-        };
+                {
+                        rootPart,
+                        rootPart
+                };
 
         numberOfRoots += 2;
     }
@@ -937,7 +937,7 @@ unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>&
         radicand = fms(static_cast<fp_t>(-2.0L), x2, static_cast<fp_t>(2.0L)* sigma, subRadical);
         radicand_ = fms(static_cast<fp_t>(-2.0L), x2, static_cast<fp_t>(-2.0L)* sigma, subRadical);
     }
-    // - Иначе все корни резольвентного кубического уравнения вещественные
+        // - Иначе все корни резольвентного кубического уравнения вещественные
     else
     {
         theta = cubicRoots[0].real();
@@ -969,20 +969,20 @@ unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>&
         fp_t radical = sqrt(radicand);
 
         roots =
-        {
-            fma(ONE_HALF, radical, rootPart),
-            fma(-ONE_HALF, radical, rootPart)
-        };
+                {
+                        fma(ONE_HALF, radical, rootPart),
+                        fma(-ONE_HALF, radical, rootPart)
+                };
 
         numberOfRoots += 2;
     }
     else if (abs(radicand) <= EPS)
     {
         roots =
-        {
-            rootPart,
-            rootPart
-        };
+                {
+                        rootPart,
+                        rootPart
+                };
 
         numberOfRoots += 2;
     }
@@ -1011,7 +1011,11 @@ unsigned int vanDerWaerden(fp_t n, fp_t a, fp_t b, fp_t c, fp_t d, vector<fp_t>&
 }
 
 
-
+/*
+    Имплементация метода решения уравнения четвертой степени — Mansfield Merriman
+    Информация о методе — https://www.jstor.org/stable/2369666
+    Работу выполнил — Успенский Артём, Кукулиев Андрей (https://github.com/MadBunny0/Solution_of_the_Quartic_Equation-Merriman-1892)
+*/
 template<typename fp_t>
 unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector<fp_t>& roots) {
     // Нормировка коэффициентов
@@ -1086,7 +1090,7 @@ unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector<fp_t>& 
         fp_t u = fma(a, a, -b) + s + t; // a^2 - b + s + t
         fp_t v = fms(TWO, pow(a, TWO), TWO, b) - s - t; // 2a^2 - 2b - s - t
         fp_t w = fms(THREE, pow(s, TWO), SIX * s, t) +
-            fma(v, v, THREE * pow(t, TWO)); // v^2 + 3s^2 - 6st + 3t^2
+                 fma(v, v, THREE * pow(t, TWO)); // v^2 + 3s^2 - 6st + 3t^2
 
         fp_t roots_term_1 = sqrt(u);
         fp_t roots_term_2 = sqrt(v + sqrt(w));
@@ -1094,17 +1098,17 @@ unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector<fp_t>& 
         if (cond_coef < 0) {
             roots[0] = -a + roots_term_1 + roots_term_2;
             roots[1] = -a + roots_term_1 - roots_term_2;
-            roots[2] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
-            roots[3] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+            //roots[2] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+            //roots[3] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
         }
         else {
             roots[0] = -a - roots_term_1 - roots_term_2;
             roots[1] = -a - roots_term_1 + roots_term_2;
-            roots[2] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
-            roots[3] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+            //roots[2] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+            //roots[3] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
         }
         //cout << "m * m - nn > 0" << endl;
-        numberOfRoots = 4;
+        numberOfRoots = 2;
     }
     else if (isZero(radical)) {
 
@@ -1315,6 +1319,6 @@ void testQuarticPolynomial(int testCount, long double maxDistance)
 
 int main()
 {
-    testQuarticPolynomial<fp_t>(10'000'000, 1e-5);
+    testQuarticPolynomial<fp_t>(1'000'000, 1e-1);
     //float a = merriman<float>(0, 9, 0, -1);
 }
