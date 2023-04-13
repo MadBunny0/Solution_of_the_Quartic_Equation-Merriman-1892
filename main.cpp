@@ -10,6 +10,7 @@
 #include <algorithm>
 #include "excerpt.h"
 
+
 typedef float fp_t;
 
 using namespace std;
@@ -1039,6 +1040,7 @@ unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector<fp_t>& 
     static const fp_t THREE = static_cast<fp_t>(3.0L);
     static const fp_t SIX = static_cast<fp_t>(6.0L);
     static const fp_t NINE = static_cast<fp_t>(9.0L);
+    static const fp_t EPS = static_cast<fp_t>(1e-6);
 
     // Пересчёт переменных
     fp_t a = a_ * ONE_QUARTER;
@@ -1051,15 +1053,15 @@ unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector<fp_t>& 
     //vector<fp_t> roots(4);
 
     // Вычисляем расчетные коэффициенты
-    fp_t m = fms(pow(a, TWO), d, -pow(b, TWO), b) + fms(c, c, TWO * a * b, c) - b * d; // a^2 * d + b^3 + c^2 - 2abc - bd
-    fp_t nn = pow(b*b + fms(ONE_THIRD, d, FOUR_THIRD, a * c), THREE);      // (b^2 + 1/3d - 4/3ac)^3
+    fp_t m = fma(b * b, b, fms(d, fma(a, a, -b), -c, fma(-2 * a, b, c))); // a^2 * d + b^3 + c^2 - 2abc - bd
+    fp_t nn = pow(fma(b, b, fms(ONE_THIRD, d, FOUR_THIRD * a, c)), THREE);      // (b^2 + 1/3d - 4/3ac)^3
 
     // переменная для развитвления логики m^2 - n: приводит к разным u,v,w
     fp_t radical = fma(m, m, - nn);
     // переменная для развитвления логики 2a^3 - 3ab + c: определяет знаки в корнях
     fp_t cond_coef = fms(TWO, pow(a, THREE), THREE, a * b) + c;
 
-    /*
+    /*0
     if (isZero(a) && isZero(c)) {
         fp_t roots_term = sqrt(fma(NINE, pow(b,TWO), -d));
         roots[0] = sqrt(fma(-THREE, b, roots_term));
@@ -1094,23 +1096,59 @@ unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector<fp_t>& 
 
         fp_t roots_term_1 = sqrt(u);
         fp_t roots_term_2 = sqrt(v + sqrt(w));
+        fp_t roots_term_3 = sqrt(v - sqrt(w));
 
-        if (cond_coef < 0) {
-            roots[0] = -a + roots_term_1 + roots_term_2;
-            roots[1] = -a + roots_term_1 - roots_term_2;
-            //roots[2] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
-            //roots[3] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+        if (isnan(roots_term_1) || (isnan(roots_term_2) && isnan(roots_term_3))) {
+            //cout << "All roots are complex CASE 1" << endl;
+            return 0;
+        }
+        else if (isnan(roots_term_3)) {
+            if (cond_coef < 0) {
+                roots[0] = -a + roots_term_1 + roots_term_2;
+                roots[1] = -a + roots_term_1 - roots_term_2;
+                roots[2] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+                roots[3] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+            }
+            else {
+                roots[0] = -a - roots_term_1 - roots_term_2;
+                roots[1] = -a - roots_term_1 + roots_term_2;
+                roots[2] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+                roots[3] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+            }
+        }
+        else if (isnan(roots_term_2)) {
+            if (cond_coef < 0) {
+                roots[0] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+                roots[1] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+                roots[2] = -a - roots_term_1 + roots_term_3;
+                roots[3] = -a - roots_term_1 - roots_term_3;
+            }
+            else {
+                roots[0] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+                roots[1] = -a - roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+                roots[2] = -a + roots_term_1 - roots_term_3;
+                roots[3] = -a + roots_term_1 + roots_term_3;
+            }
         }
         else {
-            roots[0] = -a - roots_term_1 - roots_term_2;
-            roots[1] = -a - roots_term_1 + roots_term_2;
-            //roots[2] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
-            //roots[3] = -a + roots_term_1; //УБРАЛИ МНИМУЮ ЧАСТЬ
+            if (cond_coef < 0) {
+                roots[0] = -a + roots_term_1 + roots_term_2;
+                roots[1] = -a + roots_term_1 - roots_term_2;
+                roots[2] = -a - roots_term_1 + roots_term_3;
+                roots[3] = -a - roots_term_1 - roots_term_3;
+            }
+            else {
+                roots[0] = -a - roots_term_1 - roots_term_2;
+                roots[1] = -a - roots_term_1 + roots_term_2;
+                roots[2] = -a + roots_term_1 - roots_term_3;
+                roots[3] = -a + roots_term_1 + roots_term_3;
+            }
+            //cout << "ibanutiy else";
         }
+        numberOfRoots = 4;
         //cout << "m * m - nn > 0" << endl;
-        numberOfRoots = 2;
     }
-    else if (isZero(radical)) {
+    else if (abs(radical) <= EPS) {
 
 
         fp_t u = fma(a, a, - b) + pow(nn, ONE_SIXTH); // a^2 - b + n^1/6
@@ -1138,6 +1176,7 @@ unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector<fp_t>& 
             fp_t roots_term_1 = sqrt(u);
             fp_t roots_term_2 = sqrt(TWO * v);
 
+
             if (cond_coef < 0) {
                 roots[0] = -a + roots_term_1 + roots_term_2;
                 roots[1] = -a + roots_term_1 - roots_term_2;
@@ -1149,6 +1188,7 @@ unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector<fp_t>& 
                 roots[1] = -a - roots_term_1 + roots_term_2;
                 roots[2] = -a + roots_term_1;
                 roots[3] = roots[2];
+
             }
             //cout << "m * m - nn == 0, v != 0" << endl;
             numberOfRoots = 4;
@@ -1163,87 +1203,59 @@ unsigned int merriman(fp_t n, fp_t a_, fp_t b_, fp_t c_, fp_t d_, vector<fp_t>& 
         fp_t roots_term_2 = sqrt(v + sqrt(w));
         fp_t roots_term_3 = sqrt(v - sqrt(w));
 
-        if (cond_coef < 0) {
-            roots[0] = -a - roots_term_1 - roots_term_2;
-            roots[1] = -a - roots_term_1 + roots_term_2;
-            roots[2] = -a + roots_term_1 - roots_term_3;
-            roots[3] = -a + roots_term_1 + roots_term_3;
+
+        if (isnan(roots_term_1) || (isnan(roots_term_2) && isnan(roots_term_3))) {
+            //cout << "ALL of roots are complex CASE 4" << endl;
+            return 0;
         }
-        else {
-            roots[0] = -a + roots_term_1 + roots_term_2;
-            roots[1] = -a + roots_term_1 - roots_term_2;
-            roots[2] = -a - roots_term_1 + roots_term_3;
-            roots[3] = -a - roots_term_1 - roots_term_3;
+        else if (isnan(roots_term_2)) {
+            if (cond_coef < 0) {
+                roots[0] = -a - roots_term_1;
+                roots[1] = -a - roots_term_1;
+                roots[2] = -a + roots_term_1 + roots_term_3;
+                roots[3] = -a + roots_term_1 - roots_term_3;
+            }
+            else {
+                roots[0] = -a + roots_term_1;
+                roots[1] = -a + roots_term_1;
+                roots[2] = -a - roots_term_1 - roots_term_3;
+                roots[3] = -a - roots_term_1 + roots_term_3;
+            }
+            //cout << "ALL of roots are complex term_2                  ";
+
+        }
+        else if (isnan(roots_term_3)) {
+            if (cond_coef < 0) {
+                roots[0] = -a - roots_term_1 + roots_term_2;
+                roots[1] = -a - roots_term_1 - roots_term_2;
+                roots[2] = -a + roots_term_1; //у
+                roots[3] = -a + roots_term_1;
+            }
+            else {
+                roots[0] = -a + roots_term_1 - roots_term_2;
+                roots[1] = -a + roots_term_1 + roots_term_2;
+                roots[2] = -a - roots_term_1;
+                roots[3] = -a - roots_term_1;
+            }
+            //cout << "ALL of roots are complex term_3                   ";
+
         }
         //cout << "m == 0" << endl;
         numberOfRoots = 4;
     }
     else {
         //cout << "Irreducible case" << endl;
+        cout << "m = " << m << endl;
+        cout << "n = " << nn << endl;
+        cout << "radical = " << radical << endl << endl;
         return 0;
     }
-    //cout << roots[0] << " " << roots[1] << " " << roots[2] << " " << roots[3];
+    //cout << roots[0] << " " << roots[1] << " " << roots[2] << " " << roots[3] << endl;
     return numberOfRoots;
 }
 
 // ======================== ФУНКЦИИ ТЕСТИРОВАНИЯ МЕТОДОВ ======================== //
 
-template<typename fp_t>
-void testCubicPolynomial(int testCount, long double maxDistance)
-{
-    unsigned P = 3; // Степень исходного полинома
-    fp_t low = -1, high = 1; // Интервал на котором заданы корни полинома
-    fp_t absMaxError, relMaxError; // Абсолютная и относительная погрешность по итогам пройденного теста
-    fp_t absMaxErrorTotal = -1, relMaxErrorTotal = -1; // Итоговая максимальная абсолютная и относительная погрешность по итогам всех тестов
-    long double absErrorAvg = 0, relErrorAvg = 0; // Средняя абсолютная и относительная погрешность по итогам всех тестов
-    unsigned numberOfFoundRoots; // Количество найденных корней
-    unsigned cantFind = 0; // Счетчик количества ситуаций, когда методу не удалось найти корни (numberOfFoundRoots == 0)
-    vector<fp_t> coefficients(P + 1); // Вектор коэффициентов полинома
-    unsigned count = 0; // Счетчик количества ситуаций, когда относительная погрешность больше определенного числа (relMaxError > n)
-
-    for (size_t i = 0; i < testCount; ++i)
-    {
-        vector<fp_t> foundRoots(P);
-        vector<fp_t> trueRoots(P);
-
-        generate_polynomial<fp_t>(P, 0, 0, 0, static_cast<fp_t>(maxDistance), low, high, trueRoots, coefficients);
-
-        numberOfFoundRoots = solveCubic<fp_t>(coefficients[3], coefficients[2], coefficients[1], coefficients[0], foundRoots);
-
-        if (numberOfFoundRoots > 0)
-        {
-            compare_roots<fp_t>(numberOfFoundRoots, P, foundRoots, trueRoots, absMaxError, relMaxError);
-
-            absMaxErrorTotal = absMaxError > absMaxErrorTotal ? absMaxError : absMaxErrorTotal;
-            absErrorAvg += absMaxError;
-
-            relMaxErrorTotal = relMaxError > relMaxErrorTotal ? relMaxError : relMaxErrorTotal;
-            relErrorAvg += relMaxError;
-
-            count += relMaxError > 1 ? 1 : 0;
-        }
-        else
-            cantFind += 1;
-    }
-
-    absErrorAvg /= (testCount - cantFind);
-    relErrorAvg /= (testCount - cantFind);
-
-    if (PRINT)
-    {
-        cout << "CUBIC TEST RESULTS" << endl;
-        cout << "========================================" << endl;
-        cout << "Max distance: " << maxDistance << endl;
-        cout << "Total count of tests: " << testCount << endl;
-        cout << "Couldn't find roots: " << cantFind << " times " << endl;
-        cout << "Average absolute error: " << absErrorAvg << endl;
-        cout << "Total maximum absolute error: " << absMaxErrorTotal << endl;
-        cout << "Average relative error: " << relErrorAvg << endl;
-        cout << "Total maximum relative error: " << relMaxErrorTotal << endl;
-        cout << "RelMaxError > 1: " << count << " times" << endl;
-        cout << "========================================" << endl;
-    }
-}
 
 template<typename fp_t>
 void testQuarticPolynomial(int testCount, long double maxDistance)
@@ -1267,7 +1279,7 @@ void testQuarticPolynomial(int testCount, long double maxDistance)
         int excessRoots = 0;
         int lostRoots = 0;
 
-        generate_polynomial<fp_t>(P, 0, P, 0, static_cast<fp_t>(maxDistance), low, high, trueRoots, coefficients);
+        generate_polynomial<fp_t>(P, 0, 0, 0, static_cast<fp_t>(maxDistance), low, high, trueRoots, coefficients);
 
         numberOfFoundRoots = merriman<fp_t>(coefficients[4], coefficients[3], coefficients[2], coefficients[1], coefficients[0], foundRoots);
 
@@ -1319,6 +1331,8 @@ void testQuarticPolynomial(int testCount, long double maxDistance)
 
 int main()
 {
-    testQuarticPolynomial<fp_t>(1'000'000, 1e-1);
-    //float a = merriman<float>(0, 9, 0, -1);
+    testQuarticPolynomial<fp_t>(100, 1e-1);
+    //float a = merriman<float>(0, 30, 20, 30);
 }
+
+
